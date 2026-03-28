@@ -52,6 +52,9 @@ export interface FieldConfig {
   minDate?: Date | string;
   maxDate?: Date | string;
   dateFormat?: string;
+  rangeMode?: boolean;
+  startLabel?: string;
+  endLabel?: string;
   
   // File upload specific
   accept?: string;

@@ -105,6 +105,17 @@ import { DateUtils } from '@org/shared';
           }
         </mat-form-field>
       }
+      @case ('date-range') {
+        <mat-form-field [appearance]="field.appearance || 'outline'">
+          <mat-label>{{ field.label || 'Select Date Range' }}</mat-label>
+          <mat-date-range-input [rangePicker]="rangePicker">
+            <input matStartDate [placeholder]="field.startLabel || 'From'" [formControlName]="field.key + 'Start'" />
+            <input matEndDate [placeholder]="field.endLabel || 'To'" [formControlName]="field.key + 'End'" />
+          </mat-date-range-input>
+          <mat-datepicker-toggle matIconSuffix [for]="rangePicker"></mat-datepicker-toggle>
+          <mat-date-range-picker #rangePicker></mat-date-range-picker>
+        </mat-form-field>
+      }
       @case ('checkbox') {
         <mat-checkbox [formControlName]="field.key" color="primary">
           {{ field.label }}

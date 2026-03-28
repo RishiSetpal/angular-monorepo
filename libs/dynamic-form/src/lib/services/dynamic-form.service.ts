@@ -24,12 +24,28 @@ export class DynamicFormService {
 
     fields.forEach((field) => {
       if (field.type !== 'hidden') {
-        const validators = this.createValidators(field);
-        const defaultValue = field.defaultValue ?? (field.multiple ? [] : null);
-        group[field.key] = new FormControl(
-          { value: defaultValue, disabled: field.disabled },
-          { validators }
-        );
+        if (field.type === 'date-range') {
+          // For date-range, create two form controls
+          const startKey = field.key + 'Start';
+          const endKey = field.key + 'End';
+          const defaultValue = field.defaultValue;
+          
+          group[startKey] = new FormControl(
+            { value: defaultValue?.[0] || null, disabled: field.disabled },
+            { validators: [] }
+          );
+          group[endKey] = new FormControl(
+            { value: defaultValue?.[1] || null, disabled: field.disabled },
+            { validators: [] }
+          );
+        } else {
+          const validators = this.createValidators(field);
+          const defaultValue = field.defaultValue ?? (field.multiple ? [] : null);
+          group[field.key] = new FormControl(
+            { value: defaultValue, disabled: field.disabled },
+            { validators }
+          );
+        }
       }
     });
 

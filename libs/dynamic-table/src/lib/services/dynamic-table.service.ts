@@ -136,12 +136,17 @@ export class DynamicTableService {
         return value ? 'Yes' : 'No';
       case 'number':
         return Number(value).toLocaleString();
+      case 'custom':
+        if (column.render) {
+          return String(column.render(value, null));
+        }
+        return String(value);
       default:
         return String(value);
     }
   }
 
-  private formatDate(value: any, format?: string): string {
+  formatDate(value: any, format?: string): string {
     if (!value) return '';
     const date = new Date(value);
     if (isNaN(date.getTime())) return '';
@@ -150,12 +155,31 @@ export class DynamicTableService {
       'January', 'February', 'March', 'April', 'May', 'June',
       'July', 'August', 'September', 'October', 'November', 'December'
     ];
+    const monthsShort = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
 
-    const day = date.getDate();
+    const day = date.getDate().toString().padStart(2, '0');
+    const dayNoPad = date.getDate();
     const month = months[date.getMonth()];
+    const monthShort = monthsShort[date.getMonth()];
     const year = date.getFullYear();
+    const yearShort = year.toString().slice(-2);
 
-    return `${day}-${month}-${year}`;
+    if (!format) {
+      return `${day}-${month}-${year}`;
+    }
+
+    return format
+      .replace(/DD/g, day)
+      .replace(/D/g, dayNoPad.toString())
+      .replace(/MMMM/g, month)
+      .replace(/MMM/g, monthShort)
+      .replace(/MM/g, (date.getMonth() + 1).toString().padStart(2, '0'))
+      .replace(/M/g, (date.getMonth() + 1).toString())
+      .replace(/YYYY/g, year.toString())
+      .replace(/YY/g, yearShort);
   }
 
   getCellStyle(row: any, column: TableColumn): Record<string, any> {
