@@ -28,7 +28,9 @@ jobs:
       - run: npm ci
       - run: npx playwright install --only-shell
 
-      - run: npx nx run-many -t build typecheck e2e
+      - run: npx nx build demo-app
+      - run: npx nx typecheck demo-app
+      - run: npx nx e2e demo-app-e2e
       # Nx Cloud recommends fixes for failures to help you get CI green faster. Learn more: https://nx.dev/ci/features/self-healing-ci
       - run: npx nx fix-ci
         if: always()
