@@ -253,7 +253,8 @@ import {
             <lib-dynamic-table 
               [config]="advancedTableConfig" 
               [data]="advancedTableData"
-              (rowAction)="onAdvancedTableAction($event)">
+              (rowAction)="onAdvancedTableAction($event)"
+              (cellEdit)="onAdvancedCellEdit($event)">
             </lib-dynamic-table>
           </div>
         </mat-tab>
@@ -716,23 +717,25 @@ export class DemoComponent {
       { 
         key: 'id', 
         label: 'ID', 
-        width: '60px',
+        width: '50px',
         sortable: true 
       },
       { 
         key: 'name', 
-        label: 'Employee', 
+        label: 'Employee Name', 
         sortable: true, 
         filterable: true,
         path: 'personal.name',
-        editable: true
+        editable: true,
+        editorType: 'text'
       },
       { 
         key: 'email', 
-        label: 'Email',
+        label: 'Email Address',
         path: 'personal.email',
         filterable: true,
-        editable: true
+        editable: true,
+        editorType: 'text'
       },
       { 
         key: 'department', 
@@ -747,31 +750,49 @@ export class DemoComponent {
         })
       },
       { 
+        key: 'country', 
+        label: 'Country',
+        editable: true,
+        editorType: 'select',
+        editorOptions: { options: this.countryOptions },
+        transform: (value: any) => value || '-'
+      },
+      { 
         key: 'salary', 
         label: 'Salary', 
         type: 'number',
         align: 'right',
         transform: (value: any) => `$${Number(value).toLocaleString()}`,
-        visible: true,
-        editable: true
+        editable: true,
+        editorType: 'number'
       },
       { 
         key: 'status', 
         label: 'Status',
         filterable: true,
-        transform: (value: any) => value?.charAt(0).toUpperCase() + value?.slice(1),
+        editable: true,
         editorType: 'select',
         editorOptions: { options: this.statusOptions },
+        transform: (value: any) => value?.charAt(0).toUpperCase() + value?.slice(1),
         cellStyle: (value: any) => ({
           color: value === 'active' ? 'green' : value === 'inactive' ? 'red' : 'orange',
           fontWeight: 'bold'
         })
       },
       { 
+        key: 'isActive', 
+        label: 'Active',
+        type: 'boolean',
+        editable: true,
+        editorType: 'checkbox'
+      },
+      { 
         key: 'startDate', 
         label: 'Start Date', 
         type: 'date',
-        format: 'DD-MMM-YYYY'
+        format: 'DD-MMM-YYYY',
+        editable: true,
+        editorType: 'date'
       },
       { 
         key: 'skills', 
@@ -779,9 +800,12 @@ export class DemoComponent {
         transform: (value: any) => value ? value.join(', ') : '-'
       },
       { 
-        key: 'country', 
-        label: 'Country',
-        transform: (value: any) => value || '-'
+        key: 'gender', 
+        label: 'Gender',
+        editable: true,
+        editorType: 'select',
+        editorOptions: { options: this.genderOptions },
+        transform: (value: any) => value ? value.charAt(0).toUpperCase() + value.slice(1) : '-'
       },
       { 
         key: 'attachments', 
@@ -791,19 +815,16 @@ export class DemoComponent {
         render: (value: any, row: any) => {
           if (!value || value.length === 0) return '<span class="no-attachments">None</span>';
           return value.map((f: any) => 
-            `<span class="attachment-badge">${this.getFileIcon(f.type)}${f.name}</span>`
+            `<span class="attachment-badge" title="${f.name} (${this.formatFileSize(f.size)})">${this.getFileIcon(f.type)}${f.name}</span>`
           ).join('');
         }
       },
       { 
         key: 'manager', 
         label: 'Reports To',
-        path: 'reporting.manager'
-      },
-      { 
-        key: 'actions', 
-        label: 'Actions',
-        width: '150px'
+        path: 'reporting.manager',
+        editable: true,
+        editorType: 'text'
       },
     ],
     sortable: true,
@@ -811,12 +832,19 @@ export class DemoComponent {
     paginated: true,
     selectable: true,
     pageSize: 10,
+    pageSizeOptions: [5, 10, 25, 50],
     rowActions: [
       { 
         label: 'Edit', 
         icon: 'edit', 
         color: 'primary', 
         action: 'edit' 
+      },
+      { 
+        label: 'View Files', 
+        icon: 'folder_open', 
+        action: 'viewFiles',
+        visible: (row: any) => row.attachments && row.attachments.length > 0
       },
       { 
         label: 'Preview', 
@@ -837,6 +865,10 @@ export class DemoComponent {
         action: 'delete' 
       },
     ],
+    headerActions: [
+      { label: 'Add Employee', icon: 'add', action: 'add' },
+      { label: 'Export', icon: 'download', action: 'export' }
+    ],
     inlineEditable: true,
     striped: true,
     hoverable: true,
@@ -848,11 +880,13 @@ export class DemoComponent {
       id: 1,
       personal: { name: 'John Doe', email: 'john@example.com' },
       department: 'Engineering',
+      country: 'us',
       salary: 95000,
       status: 'active',
+      isActive: true,
       startDate: '2024-01-15',
       skills: ['Angular', 'TypeScript', 'Node.js'],
-      country: 'United States',
+      gender: 'male',
       attachments: [
         { name: 'resume.pdf', type: 'application/pdf', size: 245000, url: '/assets/resume.pdf' },
         { name: 'cert.pdf', type: 'application/pdf', size: 120000, url: '/assets/cert.pdf' }
@@ -863,11 +897,13 @@ export class DemoComponent {
       id: 2,
       personal: { name: 'Jane Smith', email: 'jane@example.com' },
       department: 'Marketing',
+      country: 'ca',
       salary: 75000,
       status: 'inactive',
+      isActive: false,
       startDate: '2024-02-20',
       skills: ['SEO', 'Content Marketing', 'Analytics'],
-      country: 'Canada',
+      gender: 'female',
       attachments: [
         { name: 'portfolio.pdf', type: 'application/pdf', size: 350000, url: '/assets/portfolio.pdf' }
       ],
@@ -877,11 +913,13 @@ export class DemoComponent {
       id: 3,
       personal: { name: 'Bob Johnson', email: 'bob@example.com' },
       department: 'Engineering',
+      country: 'us',
       salary: 110000,
       status: 'active',
+      isActive: true,
       startDate: '2024-03-10',
       skills: ['React', 'Python', 'AWS', 'Docker'],
-      country: 'United States',
+      gender: 'male',
       attachments: [],
       reporting: { manager: 'Sarah Wilson' }
     },
@@ -889,11 +927,13 @@ export class DemoComponent {
       id: 4,
       personal: { name: 'Alice Brown', email: 'alice@example.com' },
       department: 'HR',
+      country: 'uk',
       salary: 65000,
       status: 'pending',
+      isActive: true,
       startDate: '2024-03-15',
       skills: ['Recruiting', 'Training', 'Employee Relations'],
-      country: 'United Kingdom',
+      gender: 'female',
       attachments: [
         { name: 'cv.pdf', type: 'application/pdf', size: 180000, url: '/assets/cv.pdf' },
         { name: 'references.docx', type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', size: 95000, url: '/assets/references.docx' }
@@ -904,15 +944,33 @@ export class DemoComponent {
       id: 5,
       personal: { name: 'Charlie Wilson', email: 'charlie@example.com' },
       department: 'Finance',
+      country: 'de',
       salary: 85000,
       status: 'active',
+      isActive: true,
       startDate: '2024-04-01',
       skills: ['Excel', 'Financial Modeling', 'SAP'],
-      country: 'Germany',
+      gender: 'male',
       attachments: [
         { name: 'report.xlsx', type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', size: 520000, url: '/assets/report.xlsx' }
       ],
       reporting: { manager: 'Emma Davis' }
+    },
+    {
+      id: 6,
+      personal: { name: 'Diana Martinez', email: 'diana@example.com' },
+      department: 'Sales',
+      country: 'fr',
+      salary: 72000,
+      status: 'active',
+      isActive: true,
+      startDate: '2024-04-10',
+      skills: ['Sales', 'CRM', 'Negotiation'],
+      gender: 'female',
+      attachments: [
+        { name: 'sales_plan.pptx', type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation', size: 1200000, url: '/assets/sales_plan.pptx' }
+      ],
+      reporting: { manager: 'Mike Brown' }
     },
   ];
 
@@ -994,9 +1052,9 @@ export class DemoComponent {
       this.dialog.open(DialogComponent, {
         data: {
           title: 'Edit Employee',
-          message: `Edit employee: ${event.row.personal?.name || event.row.name}`,
-          confirmText: 'Save',
-          cancelText: 'Cancel'
+          message: `Edit employee: ${event.row.personal?.name || event.row.name}\n\nNote: You can also double-click on any cell to edit inline!`,
+          confirmText: 'OK',
+          cancelText: ''
         }
       });
     } else if (event.action.action === 'delete') {
@@ -1016,7 +1074,54 @@ export class DemoComponent {
       this.downloadAttachment(event.row);
     } else if (event.action.action === 'preview') {
       this.previewAttachment(event.row);
+    } else if (event.action.action === 'viewFiles') {
+      this.viewFiles(event.row);
+    } else if (event.action.action === 'add') {
+      this.addNewRow();
+    } else if (event.action.action === 'export') {
+      this.exportData();
     }
+  }
+
+  viewFiles(row: any): void {
+    const attachments = row.attachments || [];
+    if (attachments.length === 0) return;
+    
+    const filesList = attachments.map((f: any) => 
+      `<div style="display: flex; align-items: center; gap: 8px; padding: 8px; border-bottom: 1px solid #eee;">
+        <span>${this.getFileIcon(f.type)}</span>
+        <div>
+          <div style="font-weight: 500;">${f.name}</div>
+          <div style="font-size: 12px; color: #666;">${this.formatFileSize(f.size)}</div>
+        </div>
+      </div>`
+    ).join('');
+
+    this.dialog.open(DialogComponent, {
+      data: {
+        title: `Files for ${row.personal?.name || row.name}`,
+        message: `<div style="max-height: 300px; overflow-y: auto;">${filesList}</div>`,
+        confirmText: 'Download All',
+        cancelText: 'Close',
+        htmlContent: true
+      }
+    });
+  }
+
+  onAdvancedCellEdit(event: { row: any; column: any; value: any }): void {
+    console.log('Advanced table cell edited:', event);
+    const fieldName = event.column.key;
+    event.row[fieldName] = event.value;
+    
+    this.dialog.open(SuccessPopupComponent, {
+      data: {
+        title: 'Cell Updated',
+        message: `${event.column.label} updated to: ${event.value}`,
+        icon: 'edit',
+        autoClose: true,
+        autoCloseDuration: 2000
+      }
+    });
   }
 
   downloadAttachment(row: any): void {

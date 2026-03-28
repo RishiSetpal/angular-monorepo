@@ -1,16 +1,15 @@
-import { Component, Input, forwardRef, signal } from '@angular/core';
+import { Component, Input, forwardRef, signal, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
+import { MatSelectModule, MatSelect } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { SelectOption } from '@org/shared';
 
 @Component({
   selector: 'lib-multi-select',
   standalone: true,
-  imports: [CommonModule, FormsModule, MatFormFieldModule, MatSelectModule, MatInputModule, MatCheckboxModule],
+  imports: [CommonModule, FormsModule, MatFormFieldModule, MatSelectModule, MatInputModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -24,9 +23,9 @@ import { SelectOption } from '@org/shared';
       @if (searchable) {
         <input matInput [placeholder]="searchPlaceholder" [value]="searchTerm()" (input)="onSearch($event)" />
       }
-      <mat-select [disabled]="disabled" [value]="value" multiple (selectionChange)="onSelectionChange($event.value)">
+      <mat-select #selectRef [disabled]="disabled" [value]="value" multiple (selectionChange)="onSelectionChange($event.value)">
         @if (showSelectAll) {
-          <mat-option [value]="'__select_all__'" (click)="toggleSelectAll($event)">
+          <mat-option (click)="toggleSelectAll()">
             <span [style.font-weight]="allSelected() ? 'bold' : 'normal'">
               {{ allSelected() ? 'Deselect All' : 'Select All' }}
             </span>
@@ -60,6 +59,8 @@ export class MultiSelectComponent implements ControlValueAccessor {
   @Input() appearance: 'fill' | 'outline' = 'outline';
   @Input() className = '';
 
+  @ViewChild('selectRef') selectRef!: MatSelect;
+
   value: any[] = [];
   searchTerm = signal('');
   filteredOptions = signal<SelectOption[]>([]);
@@ -88,8 +89,7 @@ export class MultiSelectComponent implements ControlValueAccessor {
     return this.value.length === this.options.length;
   }
 
-  toggleSelectAll(event?: Event): void {
-    event?.stopPropagation();
+  toggleSelectAll(): void {
     if (this.allSelected()) {
       this.value = [];
     } else {
@@ -97,6 +97,10 @@ export class MultiSelectComponent implements ControlValueAccessor {
     }
     this.updateSelectedCount();
     this.onChangeFn(this.value);
+    this.onTouchedFn();
+    setTimeout(() => {
+      this.selectRef.close();
+    });
   }
 
   writeValue(value: any[]): void {

@@ -1,4 +1,4 @@
-export type ColumnType = 'text' | 'number' | 'date' | 'boolean' | 'custom' | 'template' | 'attachment';
+export type ColumnType = 'text' | 'number' | 'date' | 'boolean' | 'custom' | 'template' | 'attachment' | 'checkbox';
 export type CellAlign = 'left' | 'center' | 'right';
 export type SortDirection = 'asc' | 'desc' | '';
 

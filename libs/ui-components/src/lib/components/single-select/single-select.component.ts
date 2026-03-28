@@ -35,6 +35,7 @@ import { SelectOption } from '@org/shared';
   styles: [`
     :host { display: block; }
     mat-form-field { width: 100%; }
+    ::ng-deep .mat-mdc-select-panel { max-height: 200px !important; }
   `],
 })
 export class SingleSelectComponent implements ControlValueAccessor {

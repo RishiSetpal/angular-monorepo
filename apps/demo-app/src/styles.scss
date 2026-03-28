@@ -94,15 +94,10 @@ button .mat-icon {
   line-height: inherit !important;
 }
 
-/* Date Picker Overlay Fix - Prevent calendar appearing at top of page */
-.cdk-overlay-container {
-  z-index: 1000;
-  position: fixed;
-}
-
-.cdk-overlay-pane {
-  position: absolute !important;
-}
+// /* Date Picker Overlay Fix */
+// .cdk-overlay-container {
+//   z-index: 1000;
+// }
 
 .cdk-overlay-backdrop.cdk-overlay-backdrop-showing {
   background: rgba(0, 0, 0, 0.32);
@@ -114,28 +109,4 @@ button .mat-icon {
 
 .mat-calendar {
   font-family: Roboto, "Helvetica Neue", sans-serif;
-}
-
-/* Ensure datepicker panel is positioned correctly */
-.mat-mdc-datepicker .mat-datepicker-toggle-button {
-  outline: none;
-}
-
-/* Fix for date picker going to top - ensure proper positioning context */
-.mat-mdc-form-field {
-  position: relative;
-}
-
-.mat-mdc-form-field-subscript-wrapper {
-  height: auto;
-  min-height: 0;
-}
-
-/* Ensure proper overlay positioning */
-.cdk-global-overlay-wrapper {
-  pointer-events: none;
-}
-
-.cdk-overlay-connected-position-bounding-box {
-  pointer-events: auto;
 }
