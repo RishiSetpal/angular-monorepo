@@ -7,8 +7,30 @@ Complete documentation for all reusable UI components built with Angular Materia
 Import individual components as needed:
 
 ```typescript
-import { TextInputComponent } from '@angular-monorepo/ui-components';
+import { TextInputComponent } from '@org/ui-components';
 ```
+
+Or import all components:
+
+```typescript
+import { 
+  TextInputComponent, 
+  TextareaComponent, 
+  SingleSelectComponent, 
+  MultiSelectComponent,
+  DatePickerComponent,
+  CheckboxComponent,
+  RadioButtonComponent,
+  ToggleComponent,
+  FileUploadComponent,
+  DialogComponent,
+  SuccessPopupComponent,
+  FailurePopupComponent,
+  TabGroupComponent
+} from '@org/ui-components';
+```
+
+---
 
 ## Components
 
@@ -17,22 +39,48 @@ import { TextInputComponent } from '@angular-monorepo/ui-components';
 **Selector:** `lib-text-input`
 
 **Inputs:**
-- `label` - Field label
-- `placeholder` - Placeholder text
-- `type` - Input type (text, email, password, number)
-- `disabled` - Disable the input
-- `readonly` - Make input read-only
-- `icon` - Material icon to show
-- `appearance` - Material appearance style
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `label` | string | '' | Field label |
+| `placeholder` | string | '' | Placeholder text |
+| `type` | string | 'text' | Input type (text, email, password, number) |
+| `disabled` | boolean | false | Disable the input |
+| `readonly` | boolean | false | Make input read-only |
+| `icon` | string | '' | Material icon to show |
+| `appearance` | 'fill' \| 'outline' | 'outline' | Material appearance style |
+
+**Outputs:**
+- `valueChange` - Emits when value changes
 
 **Usage:**
-```html
+
+```typescript
+// Basic usage
 <lib-text-input
   label="Email"
   type="email"
   placeholder="Enter email"
-  [disabled]="false">
+  icon="email">
 </lib-text-input>
+
+// With reactive form
+<lib-text-input
+  formControlName="email"
+  label="Email"
+  type="email"
+  icon="email">
+</lib-text-input>
+```
+
+```typescript
+// Component code
+@Component({...})
+export class ExampleComponent {
+  form = new FormGroup({
+    email: new FormControl('', [Validators.required, Validators.email]),
+    password: new FormControl('', [Validators.required])
+  });
+}
 ```
 
 ---
@@ -42,14 +90,17 @@ import { TextInputComponent } from '@angular-monorepo/ui-components';
 **Selector:** `lib-textarea`
 
 **Inputs:**
-- `label` - Field label
-- `placeholder` - Placeholder text
-- `rows` - Number of visible rows (default: 3)
-- `disabled` - Disable the textarea
-- `readonly` - Make textarea read-only
-- `appearance` - Material appearance style
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `label` | string | '' | Field label |
+| `placeholder` | string | '' | Placeholder text |
+| `rows` | number | 3 | Number of visible rows |
+| `disabled` | boolean | false | Disable the textarea |
+| `readonly` | boolean | false | Make textarea read-only |
+| `appearance` | 'fill' \| 'outline' | 'outline' | Material appearance style |
 
 **Usage:**
+
 ```html
 <lib-textarea
   label="Description"
@@ -65,31 +116,52 @@ import { TextInputComponent } from '@angular-monorepo/ui-components';
 **Selector:** `lib-single-select`
 
 **Inputs:**
-- `label` - Field label
-- `options` - Array of `SelectOption`
-- `searchable` - Enable search filter
-- `searchPlaceholder` - Placeholder for search
-- `disabled` - Disable the select
-- `appearance` - Material appearance style
-- `asyncData` - Async data source
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `label` | string | '' | Field label |
+| `options` | SelectOption[] | [] | Array of options |
+| `searchable` | boolean | false | Enable search filter |
+| `searchPlaceholder` | string | 'Search...' | Search placeholder |
+| `disabled` | boolean | false | Disable the select |
+| `appearance` | 'fill' \| 'outline' | 'outline' | Material appearance style |
+| `asyncData` | SelectOption[] | null | Async data source |
 
 **SelectOption Interface:**
 ```typescript
 interface SelectOption {
-  label: string;
-  value: any;
-  disabled?: boolean;
-  group?: string;
-  description?: string;
+  label: string;       // Display text
+  value: any;         // Value to submit
+  disabled?: boolean;  // Disable this option
+  group?: string;      // Option group
+  description?: string; // Additional description
 }
 ```
 
 **Usage:**
+
+```typescript
+// Define options
+countries = [
+  { label: 'United States', value: 'us' },
+  { label: 'Canada', value: 'ca' },
+  { label: 'United Kingdom', value: 'uk' },
+  { label: 'India', value: 'in' }
+];
+```
+
 ```html
+<!-- Basic single select -->
+<lib-single-select
+  label="Country"
+  [options]="countries">
+</lib-single-select>
+
+<!-- Searchable single select -->
 <lib-single-select
   label="Country"
   [options]="countries"
-  [searchable]="true">
+  [searchable]="true"
+  searchPlaceholder="Search country...">
 </lib-single-select>
 ```
 
@@ -100,21 +172,52 @@ interface SelectOption {
 **Selector:** `lib-multi-select`
 
 **Inputs:**
-- `label` - Field label
-- `options` - Array of `SelectOption`
-- `searchable` - Enable search filter
-- `showSelectAll` - Show select all option
-- `showCount` - Show selected count
-- `maxSelections` - Limit number of selections
-- `disabled` - Disable the select
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `label` | string | '' | Field label |
+| `options` | SelectOption[] | [] | Array of options |
+| `searchable` | boolean | false | Enable search filter |
+| `showSelectAll` | boolean | false | Show select all option |
+| `showCount` | boolean | true | Show selected count |
+| `maxSelections` | number | undefined | Limit number of selections |
+| `disabled` | boolean | false | Disable the select |
+| `appearance` | 'fill' \| 'outline' | 'outline' | Material appearance style |
 
 **Usage:**
+
+```typescript
+// Define options
+skills = [
+  { label: 'Angular', value: 'angular' },
+  { label: 'React', value: 'react' },
+  { label: 'Vue.js', value: 'vue' },
+  { label: 'TypeScript', value: 'ts' },
+  { label: 'JavaScript', value: 'js' },
+  { label: 'Node.js', value: 'node' }
+];
+```
+
 ```html
+<!-- Basic multi-select -->
+<lib-multi-select
+  label="Skills"
+  [options]="skills">
+</lib-multi-select>
+
+<!-- Multi-select with select all -->
 <lib-multi-select
   label="Skills"
   [options]="skills"
   [showSelectAll]="true"
-  [maxSelections]="5">
+  [showCount]="true">
+</lib-multi-select>
+
+<!-- With max selections -->
+<lib-multi-select
+  label="Skills"
+  [options]="skills"
+  [showSelectAll]="true"
+  [maxSelections]="3">
 </lib-multi-select>
 ```
 
@@ -125,16 +228,25 @@ interface SelectOption {
 **Selector:** `lib-date-picker`
 
 **Inputs:**
-- `label` - Field label (for single mode)
-- `startLabel` - Label for start date (range mode)
-- `endLabel` - Label for end date (range mode)
-- `rangeMode` - Enable date range selection
-- `minDate` - Minimum selectable date
-- `maxDate` - Maximum selectable date
-- `format` - Date format string (default: 'DD-MMMM-YYYY')
-- `disabled` - Disable the picker
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `label` | string | '' | Field label (single mode) |
+| `startLabel` | string | 'From' | Label for start date (range mode) |
+| `endLabel` | string | 'To' | Label for end date (range mode) |
+| `rangeMode` | boolean | false | Enable date range selection |
+| `minDate` | Date | undefined | Minimum selectable date |
+| `maxDate` | Date | undefined | Maximum selectable date |
+| `format` | string | 'DD-MMM-YYYY' | Date format string |
+| `disabled` | boolean | false | Disable the picker |
+| `appearance` | 'fill' \| 'outline' | 'outline' | Material appearance style |
+| `placeholder` | string | 'DD-MMM-YYYY' | Input placeholder |
+| `strictValidation` | boolean | true | Enable strict date validation |
+
+**Outputs:**
+- `dateInvalid` - Emits when invalid date is entered
 
 **Usage:**
+
 ```html
 <!-- Single Date -->
 <lib-date-picker
@@ -145,10 +257,23 @@ interface SelectOption {
 
 <!-- Date Range -->
 <lib-date-picker
+  label="Project Duration"
   [rangeMode]="true"
-  startLabel="From"
-  endLabel="To">
+  startLabel="Start Date"
+  endLabel="End Date">
 </lib-date-picker>
+```
+
+```typescript
+// Component code
+@Component({...})
+export class ExampleComponent {
+  minDate = new Date(2020, 0, 1);
+  maxDate = new Date(2030, 11, 31);
+  
+  // For range mode, the value is an array
+  dateRange: string[] = [];
+}
 ```
 
 ---
@@ -158,15 +283,23 @@ interface SelectOption {
 **Selector:** `lib-checkbox`
 
 **Inputs:**
-- `label` - Checkbox label
-- `disabled` - Disable the checkbox
-- `color` - Material color (primary, accent, warn)
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `label` | string | '' | Checkbox label |
+| `disabled` | boolean | false | Disable the checkbox |
+| `color` | 'primary' \| 'accent' \| 'warn' | 'primary' | Material color |
 
 **Usage:**
+
 ```html
 <lib-checkbox
-  label="I agree to terms"
+  label="I agree to terms and conditions"
   [disabled]="false">
+</lib-checkbox>
+
+<lib-checkbox
+  label="Subscribe to newsletter"
+  color="accent">
 </lib-checkbox>
 ```
 
@@ -177,11 +310,22 @@ interface SelectOption {
 **Selector:** `lib-radio-button`
 
 **Inputs:**
-- `options` - Array of `SelectOption`
-- `disabled` - Disable all radio buttons
-- `color` - Material color
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `options` | SelectOption[] | [] | Array of radio options |
+| `disabled` | boolean | false | Disable all radio buttons |
+| `color` | 'primary' \| 'accent' \| 'warn' | 'primary' | Material color |
 
 **Usage:**
+
+```typescript
+genderOptions = [
+  { label: 'Male', value: 'male' },
+  { label: 'Female', value: 'female' },
+  { label: 'Other', value: 'other' }
+];
+```
+
 ```html
 <lib-radio-button
   [options]="genderOptions">
@@ -195,15 +339,23 @@ interface SelectOption {
 **Selector:** `lib-toggle`
 
 **Inputs:**
-- `label` - Toggle label
-- `disabled` - Disable the toggle
-- `color` - Material color
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `label` | string | '' | Toggle label |
+| `disabled` | boolean | false | Disable the toggle |
+| `color` | 'primary' \| 'accent' \| 'warn' | 'primary' | Material color |
 
 **Usage:**
+
 ```html
 <lib-toggle
   label="Enable notifications"
-  [color]="'primary'">
+  color="primary">
+</lib-toggle>
+
+<lib-toggle
+  label="Dark Mode"
+  color="accent">
 </lib-toggle>
 ```
 
@@ -214,30 +366,73 @@ interface SelectOption {
 **Selector:** `lib-file-upload`
 
 **Inputs:**
-- `config` - File upload configuration
-- `disabled` - Disable the uploader
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `config` | FileUploadConfig | {} | File upload configuration |
+| `disabled` | boolean | false | Disable the uploader |
 
 **FileUploadConfig:**
 ```typescript
 interface FileUploadConfig {
-  accept?: string;           // File MIME types
+  accept?: string;           // File MIME types (e.g., 'image/*,.pdf')
   maxSize?: number;          // Max file size in bytes
-  multiple?: boolean;         // Allow multiple files
+  multiple?: boolean;        // Allow multiple files
   showPreview?: boolean;     // Show file preview
   showDownload?: boolean;    // Show download button
-  editable?: boolean;         // Allow editing/replacing
+  editable?: boolean;        // Allow editing/replacing
 }
 ```
 
+**Outputs:**
+- `fileChange` - Emits selected file(s)
+- `filePreview` - Emits file for preview
+
 **Usage:**
+
+```typescript
+// Single file upload config
+singleFileConfig = {
+  accept: '*',
+  maxSize: 10 * 1024 * 1024, // 10MB
+  multiple: false,
+  showPreview: true,
+  showDownload: true,
+  editable: true,
+};
+
+// Multiple file upload config
+multipleFileConfig = {
+  accept: 'image/*,.pdf,.doc,.docx',
+  maxSize: 25 * 1024 * 1024, // 25MB
+  multiple: true,
+  showPreview: true,
+  showDownload: true,
+  editable: true,
+};
+
+// Document upload (PDF, Word, Excel)
+documentConfig = {
+  accept: '.pdf,.doc,.docx,.xls,.xlsx',
+  maxSize: 25 * 1024 * 1024,
+  multiple: false,
+  showPreview: true,
+  showDownload: true,
+  editable: true,
+};
+```
+
 ```html
+<!-- Single File Upload -->
 <lib-file-upload
-  [config]="{
-    accept: 'image/*,.pdf',
-    maxSize: 5242880,
-    showPreview: true,
-    editable: true
-  }">
+  [config]="singleFileConfig"
+  (fileChange)="onFileSelected($event)">
+</lib-file-upload>
+
+<!-- Multiple File Upload -->
+<lib-file-upload
+  [config]="multipleFileConfig"
+  (fileChange)="onFilesSelected($event)"
+  (filePreview)="onPreviewFile($event)">
 </lib-file-upload>
 ```
 
@@ -248,19 +443,21 @@ interface FileUploadConfig {
 **Selector:** `lib-tab-group`
 
 **Inputs:**
-- `tabs` - Array of tab configurations
-- `selectedIndex` - Currently selected tab index
-- `animationDuration` - Tab animation duration
-- `headerPosition` - Header position (above/below)
+| Property | Type | Default | Description |
+|----------|------|---------|-------------|
+| `tabs` | TabItem[] | [] | Array of tab configurations |
+| `selectedIndex` | number | 0 | Currently selected tab index |
+| `animationDuration` | string | '500ms' | Tab animation duration |
+| `headerPosition` | 'above' \| 'below' | 'above' | Header position |
 
 **TabItem Interface:**
 ```typescript
 interface TabItem {
-  label: string;
-  icon?: string;
-  disabled?: boolean;
-  content?: any;
-  template?: TemplateRef<any>;
+  label: string;                    // Tab label
+  icon?: string;                    // Material icon
+  disabled?: boolean;               // Disable tab
+  content?: any;                    // Tab content
+  template?: TemplateRef<any>;       // Custom template
 }
 ```
 
@@ -268,9 +465,18 @@ interface TabItem {
 - `tabChanged` - Emits selected tab index
 
 **Usage:**
+
+```typescript
+demoTabs = [
+  { label: 'Tab 1', icon: 'home', content: 'Content for Tab 1' },
+  { label: 'Tab 2', icon: 'settings', content: 'Content for Tab 2' },
+  { label: 'Tab 3', icon: 'info', content: 'Content for Tab 3' },
+];
+```
+
 ```html
 <lib-tab-group
-  [tabs]="tabs"
+  [tabs]="demoTabs"
   [selectedIndex]="0"
   (tabChanged)="onTabChange($event)">
 </lib-tab-group>
@@ -285,25 +491,52 @@ interface TabItem {
 **DialogConfig:**
 ```typescript
 interface DialogConfig {
-  title: string;
-  message?: string;
-  confirmText?: string;
-  cancelText?: string;
-  width?: string;
-  disableClose?: boolean;
+  title: string;           // Dialog title
+  message?: string;        // Dialog message
+  confirmText?: string;    // Confirm button text
+  cancelText?: string;      // Cancel button text
+  width?: string;          // Dialog width (e.g., '500px')
+  disableClose?: boolean;  // Disable close on backdrop click
+  htmlContent?: boolean;    // Allow HTML in message
 }
 ```
 
 **Usage:**
+
 ```typescript
-const dialogRef = this.dialog.open(DialogComponent, {
-  data: {
-    title: 'Confirm Action',
-    message: 'Are you sure?',
-    confirmText: 'Yes',
-    cancelText: 'No'
-  }
-});
+import { MatDialog } from '@angular/material/dialog';
+import { DialogComponent } from '@org/ui-components';
+
+constructor(private dialog: MatDialog) {}
+
+openDialog() {
+  const dialogRef = this.dialog.open(DialogComponent, {
+    data: {
+      title: 'Confirm Action',
+      message: 'Are you sure you want to proceed?',
+      confirmText: 'Yes',
+      cancelText: 'No'
+    }
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    console.log('Dialog result:', result);
+  });
+}
+
+// With HTML content
+openPreviewDialog(file: any) {
+  this.dialog.open(DialogComponent, {
+    data: {
+      title: `Preview: ${file.name}`,
+      message: `<iframe src="${file.url}" style="width: 100%; height: 500px;"></iframe>`,
+      confirmText: 'Download',
+      cancelText: 'Close',
+      htmlContent: true,
+      width: '800px'
+    }
+  });
+}
 ```
 
 ---
@@ -315,23 +548,51 @@ const dialogRef = this.dialog.open(DialogComponent, {
 **SuccessPopupConfig:**
 ```typescript
 interface SuccessPopupConfig {
-  title: string;
-  message?: string;
-  icon?: string;
-  buttons?: ActionButton[];
-  autoClose?: boolean;
-  autoCloseDuration?: number;
+  title: string;                    // Popup title
+  message?: string;                 // Success message
+  icon?: string;                    // Material icon (default: 'check_circle')
+  buttons?: ActionButton[];          // Custom buttons
+  autoClose?: boolean;             // Auto close popup
+  autoCloseDuration?: number;       // Close after X milliseconds
 }
 ```
 
 **Usage:**
+
 ```typescript
+import { MatDialog } from '@angular/material/dialog';
+import { SuccessPopupComponent } from '@org/ui-components';
+
+constructor(private dialog: MatDialog) {}
+
+// Basic success popup
 this.dialog.open(SuccessPopupComponent, {
   data: {
     title: 'Success!',
-    message: 'Your action was completed.',
+    message: 'Your changes have been saved.',
+    icon: 'check_circle'
+  }
+});
+
+// With auto-close
+this.dialog.open(SuccessPopupComponent, {
+  data: {
+    title: 'Saved',
+    message: 'Data saved successfully.',
     autoClose: true,
-    autoCloseDuration: 3000
+    autoCloseDuration: 3000  // 3 seconds
+  }
+});
+
+// With custom buttons
+this.dialog.open(SuccessPopupComponent, {
+  data: {
+    title: 'Operation Complete',
+    message: 'What would you like to do next?',
+    buttons: [
+      { label: 'View Details', action: 'view', color: 'primary' },
+      { label: 'Close', action: 'close', color: 'basic' }
+    ]
   }
 });
 ```
@@ -345,26 +606,43 @@ this.dialog.open(SuccessPopupComponent, {
 **FailurePopupConfig:**
 ```typescript
 interface FailurePopupConfig {
-  title: string;
-  message?: string;
-  icon?: string;
-  buttons?: ActionButton[];
-  allowSideClose?: boolean;
-  autoClose?: boolean;
-  autoCloseDuration?: number;
+  title: string;                    // Popup title
+  message?: string;                 // Error message
+  icon?: string;                    // Material icon (default: 'error')
+  buttons?: ActionButton[];         // Custom buttons
+  allowSideClose?: boolean;         // Allow closing by clicking backdrop
+  autoClose?: boolean;              // Auto close popup
+  autoCloseDuration?: number;       // Close after X milliseconds
 }
 ```
 
 **Usage:**
+
 ```typescript
+import { MatDialog } from '@angular/material/dialog';
+import { FailurePopupComponent } from '@org/ui-components';
+
+constructor(private dialog: MatDialog) {}
+
+// Basic error popup
 this.dialog.open(FailurePopupComponent, {
   data: {
     title: 'Error',
-    message: 'Something went wrong.',
+    message: 'Something went wrong. Please try again.',
+    icon: 'error'
+  }
+});
+
+// With actions
+this.dialog.open(FailurePopupComponent, {
+  data: {
+    title: 'Delete Confirmation',
+    message: 'Are you sure you want to delete this item?',
+    icon: 'warning',
     allowSideClose: true,
     buttons: [
-      { label: 'Retry', action: 'retry', color: 'primary' },
-      { label: 'Cancel', action: 'cancel', color: 'warn' }
+      { label: 'Delete', action: 'delete', color: 'warn' },
+      { label: 'Cancel', action: 'cancel', color: 'basic' }
     ]
   }
 });
@@ -374,20 +652,87 @@ this.dialog.open(FailurePopupComponent, {
 
 ## Control Value Accessor
 
-All form components implement `ControlValueAccessor`, making them compatible with Reactive Forms:
+All form components implement `ControlValueAccessor`, making them fully compatible with Angular Reactive Forms:
+
+### FormGroup Example
 
 ```typescript
-// Example with FormGroup
-this.form = this.fb.group({
-  name: ['', Validators.required],
-  email: ['', [Validators.required, Validators.email]]
-});
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+@Component({...})
+export class ExampleComponent {
+  constructor(private fb: FormBuilder) {}
+
+  form = this.fb.group({
+    name: ['', Validators.required],
+    email: ['', [Validators.required, Validators.email]],
+    description: [''],
+    country: [''],
+    skills: [[]],
+    birthDate: [null],
+    termsAccepted: [false],
+    gender: ['male']
+  });
+
+  onSubmit() {
+    console.log('Form value:', this.form.value);
+  }
+}
 ```
 
 ```html
-<form [formGroup]="form">
-  <lib-text-input formControlName="name" label="Name"></lib-text-input>
-  <lib-text-input formControlName="email" label="Email" type="email"></lib-text-input>
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <lib-text-input
+    formControlName="name"
+    label="Full Name"
+    icon="person">
+  </lib-text-input>
+
+  <lib-text-input
+    formControlName="email"
+    label="Email"
+    type="email"
+    icon="email">
+  </lib-text-input>
+
+  <lib-textarea
+    formControlName="description"
+    label="Description"
+    [rows]="4">
+  </lib-textarea>
+
+  <lib-single-select
+    formControlName="country"
+    label="Country"
+    [options]="countries"
+    [searchable]="true">
+  </lib-single-select>
+
+  <lib-multi-select
+    formControlName="skills"
+    label="Skills"
+    [options]="skills"
+    [showSelectAll]="true">
+  </lib-multi-select>
+
+  <lib-date-picker
+    formControlName="birthDate"
+    label="Birth Date">
+  </lib-date-picker>
+
+  <lib-checkbox
+    formControlName="termsAccepted"
+    label="I agree to terms">
+  </lib-checkbox>
+
+  <lib-radio-button
+    formControlName="gender"
+    [options]="genderOptions">
+  </lib-radio-button>
+
+  <button mat-raised-button color="primary" type="submit">
+    Submit
+  </button>
 </form>
 ```
 
@@ -395,8 +740,25 @@ this.form = this.fb.group({
 
 ## Best Practices
 
-1. **Use Standalone Components:** All components are standalone for tree-shaking
+1. **Use Standalone Components:** All components are standalone for tree-shaking - import only what you need
+
 2. **Material Appearance:** Use consistent appearance across all form fields
-3. **Validation:** Always provide clear error messages
+   ```html
+   <lib-text-input appearance="outline" ...></lib-text-input>
+   <lib-textarea appearance="outline" ...></lib-textarea>
+   ```
+
+3. **Validation:** Always provide clear error messages with reactive forms
+   ```typescript
+   email: ['', [Validators.required, Validators.email]]
+   ```
+
 4. **Accessibility:** Components support ARIA attributes automatically
-5. **Lazy Loading:** Import components only where needed
+
+5. **Lazy Loading:** Import components only where needed for better performance
+
+6. **Type Safety:** Use proper TypeScript types for options and configs
+
+7. **Error Handling:** Use FailurePopupComponent for user-facing errors
+
+8. **User Feedback:** Use SuccessPopupComponent with autoClose for quick notifications
