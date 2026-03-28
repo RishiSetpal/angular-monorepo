@@ -1,285 +1,291 @@
-# Nx Angular Repository
+# Angular Monorepo UI Library
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A production-grade Angular monorepo application using Nx, featuring reusable UI components, dynamic form engine, and dynamic table engine built with Angular Material.
 
-✨ A repository showcasing key [Nx](https://nx.dev) features for Angular monorepos ✨
-## Finish your Nx platform setup
+## Architecture Overview
 
-🚀 [Finish setting up your workspace](https://cloud.nx.app/connect/tGB7UPXvwB) to get faster builds with remote caching, distributed task execution, and self-healing CI. [Learn more about Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud).
+```
+angular-monorepo/
+├── apps/
+│   └── demo-app/          # Demo application showcasing all features
+├── libs/
+│   ├── core/              # Core services, interceptors, API abstraction
+│   ├── shared/            # Shared utilities, models, constants
+│   ├── ui-components/     # Reusable Material-based UI components
+│   ├── dynamic-form/      # Config-driven form engine
+│   └── dynamic-table/     # Config-driven table engine
+```
 
-## 📦 Project Overview
+## Key Features
 
-This repository demonstrates a production-ready Angular monorepo with:
+### 1. Core Module (`@angular-monorepo/core`)
+- **AuthService**: Token-based authentication with signals
+- **ApiService**: HTTP client abstraction with CRUD operations
+- **NotificationService**: Toast notifications
+- **Interceptors**: Auth token, error handling, logging
 
-- **2 Applications**
+### 2. Shared Module (`@angular-monorepo/shared`)
+- **DateUtils**: Date formatting and manipulation
+- **ValidationUtils**: Form validation validators
+- **ObjectUtils**: Object manipulation utilities
+- **Constants**: App-wide constants and error messages
 
-  - `shop` - Angular e-commerce application with product listings and detail views
-  - `api` - Backend API with Docker support serving product data
+### 3. UI Components (`@angular-monorepo/ui-components`)
 
-- **6 Libraries**
+#### Available Components:
+1. **TextInputComponent** - Configurable text input
+2. **TextareaComponent** - Multi-line text input
+3. **SingleSelectComponent** - Searchable single select
+4. **MultiSelectComponent** - Multi-select with select-all
+5. **DatePickerComponent** - Date picker with range support
+6. **CheckboxComponent** - Material checkbox
+7. **RadioButtonComponent** - Radio button group
+8. **ToggleComponent** - Yes/No toggle
+9. **FileUploadComponent** - File upload with preview/download
+10. **TabGroupComponent** - Tabbed interface
+11. **DialogComponent** - Modal dialog
+12. **SuccessPopupComponent** - Success notification
+13. **FailurePopupComponent** - Error notification
 
-  - `@org/feature-products` - Product listing feature (Angular)
-  - `@org/feature-product-detail` - Product detail feature (Angular)
-  - `@org/data` - Data access layer for shop features
-  - `@org/shared-ui` - Shared UI components
-  - `@org/models` - Shared data models
-  - `@org/products` - API product service library
+### 4. Dynamic Form Engine (`@angular-monorepo/dynamic-form`)
 
-- **E2E Testing**
-  - `shop-e2e` - Playwright tests for the shop application
+#### Features:
+- JSON-based form configuration
+- Nested object binding (e.g., `moreInfo.address.pin`)
+- Validation rules (required, min/max, pattern)
+- Conditional field visibility
+- Async data loading for dropdowns
+- Theme configuration
+- Multi-column layouts
 
-## 🚀 Quick Start
+#### Usage:
+```typescript
+import { DynamicFormComponent, FormConfig } from '@angular-monorepo/dynamic-form';
 
+const config: FormConfig = {
+  sections: [
+    {
+      title: 'Personal Info',
+      columns: 2,
+      fields: [
+        {
+          key: 'firstName',
+          label: 'First Name',
+          type: 'text',
+          validations: [
+            { type: 'required', message: 'Required' }
+          ]
+        }
+      ]
+    }
+  ],
+  showReset: true,
+  submitLabel: 'Save'
+};
+```
+
+### 5. Dynamic Table Engine (`@angular-monorepo/dynamic-table`)
+
+#### Features:
+- Config-driven column configuration
+- Sorting, filtering, pagination
+- Row selection (single/multi)
+- Inline editing
+- Custom cell rendering
+- Row actions
+- Nested data binding
+
+#### Usage:
+```typescript
+import { DynamicTableComponent, TableConfig } from '@angular-monorepo/dynamic-table';
+
+const config: TableConfig = {
+  columns: [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'email', label: 'Email', filterable: true },
+  ],
+  sortable: true,
+  filterable: true,
+  paginated: true,
+  rowActions: [
+    { label: 'Edit', icon: 'edit', action: 'edit' }
+  ]
+};
+```
+
+## Getting Started
+
+### Prerequisites
+- Node.js >= 18
+- npm >= 9
+
+### Installation
 ```bash
-# Clone the repository
-git clone <your-fork-url>
-cd <your-repository-name>
-
 # Install dependencies
-# (Note: You may need --legacy-peer-deps)
 npm install
 
-# Serve the Angular shop application (this will simultaneously serve the API backend)
-npx nx serve shop
+# Build all libraries
+nx build core shared ui-components dynamic-form dynamic-table
 
-# ...or you can serve the API separately
-npx nx serve api
-
-# Build all projects
-npx nx run-many -t build
-
-# Run tests
-npx nx run-many -t test
-
-# Lint all projects
-npx nx run-many -t lint
-
-# Run e2e tests
-npx nx e2e shop-e2e
-
-# Run tasks in parallel
-
-npx nx run-many -t lint test build e2e --parallel=3
-
-# Visualize the project graph
-npx nx graph
+# Run demo app
+nx serve demo-app
 ```
 
-## ⭐ Featured Nx Capabilities
+### Building Libraries
+```bash
+# Build all libraries
+nx run-many --target=build
 
-This repository showcases several powerful Nx features:
+# Build specific library
+nx build ui-components
+```
 
-### 1. 🔒 Module Boundaries
+## Component Usage Examples
 
-Enforces architectural constraints using tags. Each project has specific dependencies it can use:
+### Text Input
+```html
+<lib-text-input
+  label="Username"
+  placeholder="Enter username"
+  [disabled]="false">
+</lib-text-input>
+```
 
-- `scope:shared` - Can be used by all projects
-- `scope:shop` - Shop-specific libraries
-- `scope:api` - API-specific libraries
-- `type:feature` - Feature libraries
-- `type:data` - Data access libraries
-- `type:ui` - UI component libraries
+### Single Select with Search
+```html
+<lib-single-select
+  label="Country"
+  [options]="countries"
+  [searchable]="true">
+</lib-single-select>
+```
 
-**Try it out:**
+### Date Range Picker
+```html
+<lib-date-picker
+  [rangeMode]="true"
+  startLabel="From"
+  endLabel="To"
+  format="DD-MMMM-YYYY">
+</lib-date-picker>
+```
+
+### Dynamic Form
+```html
+<lib-dynamic-form
+  [config]="formConfig"
+  (formSubmit)="onSubmit($event)">
+</lib-dynamic-form>
+```
+
+### Dynamic Table
+```html
+<lib-dynamic-table
+  [config]="tableConfig"
+  [data]="tableData"
+  (rowAction)="onAction($event)">
+</lib-dynamic-table>
+```
+
+## Form Configuration
+
+### Field Types
+- `text`, `email`, `password`, `number`
+- `textarea`, `select`, `multi-select`
+- `date`, `date-range`
+- `checkbox`, `radio`, `toggle`
+- `file`, `hidden`
+
+### Validation Rules
+```typescript
+validations: [
+  { type: 'required', message: 'Required' },
+  { type: 'email', message: 'Invalid email' },
+  { type: 'minLength', value: 3, message: 'Too short' },
+  { type: 'maxLength', value: 50, message: 'Too long' },
+  { type: 'pattern', value: '^[A-Z]', message: 'Must start with capital' }
+]
+```
+
+### Conditional Logic
+```typescript
+conditions: [
+  {
+    field: 'role',
+    operator: 'equals',
+    value: 'admin',
+    action: 'show' // 'show' | 'hide' | 'enable' | 'disable'
+  }
+]
+```
+
+## Table Configuration
+
+### Column Options
+```typescript
+{
+  key: 'name',
+  label: 'Full Name',
+  type: 'text', // 'text' | 'number' | 'date' | 'boolean'
+  sortable: true,
+  filterable: true,
+  visible: true,
+  align: 'left', // 'left' | 'center' | 'right'
+  transform: (value, row) => value.toUpperCase(),
+  cellStyle: { color: 'red' },
+  editable: true
+}
+```
+
+### Row Actions
+```typescript
+rowActions: [
+  {
+    label: 'Edit',
+    icon: 'edit',
+    color: 'primary',
+    action: 'edit' // or (row) => console.log(row)
+  }
+]
+```
+
+## Best Practices
+
+### 1. Component Design
+- Use standalone components
+- Implement ControlValueAccessor for form controls
+- Use signals for reactive state
+- Follow single responsibility principle
+
+### 2. Form Engine
+- Define validation rules in config
+- Use conditional logic sparingly
+- Flatten nested objects for API compatibility
+- Handle async options loading
+
+### 3. Table Engine
+- Configure columns declaratively
+- Use templates for custom rendering
+- Implement proper sorting/filtering logic
+- Handle pagination on server for large datasets
+
+### 4. Performance
+- Lazy load modules
+- Use OnPush change detection
+- Virtualize long lists
+- Debounce search inputs
+
+## Testing
 
 ```bash
-# See the current project graph and boundaries
-npx nx graph
+# Run all tests
+nx test
 
-# View a specific project's details
-npx nx show project shop --web
+# Run tests for specific library
+nx test ui-components
+nx test dynamic-form
 ```
 
-[Learn more about module boundaries →](https://nx.dev/features/enforce-module-boundaries)
+## License
 
-### 2. 🐳 Docker Integration
-
-The API project includes Docker support with automated targets and release management:
-
-```bash
-# Build Docker image
-npx nx docker:build api
-
-# Run Docker container
-npx nx docker:run api
-
-# Release with automatic Docker image versioning
-npx nx release
-```
-
-**Nx Release for Docker:** The repository is configured to use Nx Release for managing Docker image versioning and publishing. When running `nx release`, Docker images for the API project are automatically versioned and published based on the release configuration in `nx.json`. This integrates seamlessly with semantic versioning and changelog generation.
-
-[Learn more about Docker integration →](https://nx.dev/recipes/nx-release/release-docker-images)
-
-### 3. 🎭 Playwright E2E Testing
-
-End-to-end testing with Playwright is pre-configured:
-
-```bash
-# Run e2e tests
-npx nx e2e shop-e2e
-
-# Run e2e tests in CI mode
-npx nx e2e-ci shop-e2e
-```
-
-[Learn more about E2E testing →](https://nx.dev/technologies/test-tools/playwright/introduction#e2e-testing)
-
-### 4. ⚡ Vitest for Unit Testing
-
-Fast unit testing with Vite for Angular libraries:
-
-```bash
-# Test a specific library
-npx nx test data
-
-# Test all projects
-npx nx run-many -t test
-```
-
-[Learn more about Vite testing →](https://nx.dev/recipes/vite)
-
-### 5. 🔧 Self-Healing CI
-
-The CI pipeline includes `nx fix-ci` which automatically identifies and suggests fixes for common issues:
-
-```bash
-# In CI, this command provides automated fixes
-npx nx fix-ci
-```
-
-This feature helps maintain a healthy CI pipeline by automatically detecting and suggesting solutions for:
-
-- Missing dependencies
-- Incorrect task configurations
-- Cache invalidation issues
-- Common build failures
-
-[Learn more about self-healing CI →](https://nx.dev/ci/features/self-healing-ci)
-
-## 📁 Project Structure
-
-```
-├── apps/
-│   ├── shop/           [scope:shop]    - Angular e-commerce app
-│   ├── shop-e2e/                       - E2E tests for shop
-│   └── api/            [scope:api]     - Backend API with Docker
-├── libs/
-│   ├── shop/
-│   │   ├── feature-products/        [scope:shop,type:feature] - Product listing
-│   │   ├── feature-product-detail/  [scope:shop,type:feature] - Product details
-│   │   ├── data/                    [scope:shop,type:data]    - Data access
-│   │   └── shared-ui/               [scope:shop,type:ui]      - UI components
-│   ├── api/
-│   │   └── products/    [scope:api]    - Product service
-│   └── shared/
-│       └── models/      [scope:shared,type:data] - Shared models
-├── nx.json             - Nx configuration
-├── tsconfig.json       - TypeScript configuration
-└── eslint.config.mjs   - ESLint with module boundary rules
-```
-
-## 🏷️ Understanding Tags
-
-This repository uses tags to enforce module boundaries:
-
-| Project            | Tags                         | Can Import From              |
-| ------------------ | ---------------------------- | ---------------------------- |
-| `shop`             | `scope:shop`                 | `scope:shop`, `scope:shared` |
-| `api`              | `scope:api`                  | `scope:api`, `scope:shared`  |
-| `feature-products` | `scope:shop`, `type:feature` | `scope:shop`, `scope:shared` |
-| `data`             | `scope:shop`, `type:data`    | `scope:shared`               |
-| `models`           | `scope:shared`, `type:data`  | Nothing (base library)       |
-
-## 📚 Useful Commands
-
-```bash
-# Project exploration
-npx nx graph                                    # Interactive dependency graph
-npx nx list                                     # List installed plugins
-npx nx show project shop --web                 # View project details
-
-# Development
-npx nx serve shop                              # Serve Angular app
-npx nx serve api                               # Serve backend API
-npx nx build shop                              # Build Angular app
-npx nx test data                               # Test a specific library
-npx nx lint feature-products                   # Lint a specific library
-
-# Running multiple tasks
-npx nx run-many -t build                       # Build all projects
-npx nx run-many -t test --parallel=3          # Test in parallel
-npx nx run-many -t lint test build            # Run multiple targets
-
-# Affected commands (great for CI)
-npx nx affected -t build                       # Build only affected projects
-npx nx affected -t test                        # Test only affected projects
-
-# Docker operations
-npx nx docker:build api                        # Build Docker image
-npx nx docker:run api                          # Run Docker container
-```
-
-## 🎯 Adding New Features
-
-### Generate a new Angular application:
-
-```bash
-npx nx g @nx/angular:app my-app
-```
-
-### Generate a new Angular library:
-
-```bash
-npx nx g @nx/angular:lib my-lib
-```
-
-### Generate a new Angular component:
-
-```bash
-npx nx g @nx/angular:component my-component --project=my-lib
-```
-
-### Generate a new API library:
-
-```bash
-npx nx g @nx/node:lib my-api-lib
-```
-
-You can use `npx nx list` to see all available plugins and `npx nx list <plugin-name>` to see all generators for a specific plugin.
-
-## Nx Cloud
-
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## 🔗 Learn More
-
-- [Nx Documentation](https://nx.dev)
-- [Angular Monorepo Tutorial](https://nx.dev/getting-started/tutorials/angular-monorepo-tutorial)
-- [Module Boundaries](https://nx.dev/features/enforce-module-boundaries)
-- [Docker Integration](https://nx.dev/recipes/nx-release/release-docker-images)
-- [Playwright Testing](https://nx.dev/technologies/test-tools/playwright/introduction#e2e-testing)
-- [Vite with Angular](https://nx.dev/recipes/vite)
-- [Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud)
-- [Releasing Packages](https://nx.dev/features/manage-releases)
-
-## 💬 Community
-
-Join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [X (Twitter)](https://twitter.com/nxdevtools)
-- [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [YouTube](https://www.youtube.com/@nxdevtools)
-- [Blog](https://nx.dev/blog)
+MIT
