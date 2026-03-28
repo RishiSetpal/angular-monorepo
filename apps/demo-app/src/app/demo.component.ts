@@ -18,7 +18,8 @@ import {
   CheckboxComponent,
   RadioButtonComponent,
   ToggleComponent,
-  TabGroupComponent
+  TabGroupComponent,
+  FileUploadComponent
 } from '@org/ui-components';
 
 @Component({
@@ -41,6 +42,7 @@ import {
     RadioButtonComponent,
     ToggleComponent,
     TabGroupComponent,
+    FileUploadComponent,
   ],
   template: `
     <div class="demo-container">
@@ -162,6 +164,45 @@ import {
                   <lib-tab-group [tabs]="demoTabs"></lib-tab-group>
                 </mat-card-content>
               </mat-card>
+
+              <!-- Single File Upload -->
+              <mat-card class="component-card">
+                <mat-card-header><mat-card-title>Single File Upload</mat-card-title></mat-card-header>
+                <mat-card-content>
+                  <lib-file-upload 
+                    #singleUpload
+                    [config]="singleFileConfig"
+                    (fileChange)="onSingleFileChange($event)"
+                    (filePreview)="onFilePreview($event)">
+                  </lib-file-upload>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- Multiple File Upload -->
+              <mat-card class="component-card">
+                <mat-card-header><mat-card-title>Multiple File Upload</mat-card-title></mat-card-header>
+                <mat-card-content>
+                  <lib-file-upload 
+                    #multipleUpload
+                    [config]="multipleFileConfig"
+                    (fileChange)="onMultipleFileChange($event)"
+                    (filePreview)="onFilePreview($event)">
+                  </lib-file-upload>
+                </mat-card-content>
+              </mat-card>
+
+              <!-- File Upload with Custom Accept -->
+              <mat-card class="component-card">
+                <mat-card-header><mat-card-title>Document Upload (PDF, Word, Excel)</mat-card-title></mat-card-header>
+                <mat-card-content>
+                  <lib-file-upload 
+                    #documentUpload
+                    [config]="documentFileConfig"
+                    (fileChange)="onDocumentFileChange($event)"
+                    (filePreview)="onFilePreview($event)">
+                  </lib-file-upload>
+                </mat-card-content>
+              </mat-card>
             </div>
           </div>
         </mat-tab>
@@ -259,6 +300,20 @@ import {
       align-items: center;
       gap: 4px;
     }
+    .attachment-badge {
+      display: inline-flex;
+      align-items: center;
+      background: #e3f2fd;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin: 2px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .no-attachments {
+      color: #999;
+      font-style: italic;
+    }
   `],
 })
 export class DemoComponent {
@@ -299,11 +354,143 @@ export class DemoComponent {
     { label: 'Other', value: 'other' },
   ];
 
+  departmentOptions = [
+    { label: 'Engineering', value: 'Engineering' },
+    { label: 'Marketing', value: 'Marketing' },
+    { label: 'HR', value: 'HR' },
+    { label: 'Finance', value: 'Finance' },
+    { label: 'Sales', value: 'Sales' },
+    { label: 'Operations', value: 'Operations' },
+  ];
+
+  getFileIcon(type?: string): string {
+    if (!type) return '📄 ';
+    if (type.includes('pdf')) return '📕 ';
+    if (type.includes('word') || type.includes('document')) return '📘 ';
+    if (type.includes('excel') || type.includes('sheet') || type.includes('spreadsheet')) return '📗 ';
+    if (type.includes('image')) return '🖼️ ';
+    if (type.includes('text')) return '📝 ';
+    return '📄 ';
+  }
+
   demoTabs = [
     { label: 'Tab 1', icon: 'home', content: 'Content for Tab 1 - Dashboard' },
     { label: 'Tab 2', icon: 'settings', content: 'Content for Tab 2 - Settings' },
     { label: 'Tab 3', icon: 'info', content: 'Content for Tab 3 - About' },
   ];
+
+  singleFileConfig = {
+    accept: '*',
+    maxSize: 10 * 1024 * 1024,
+    multiple: false,
+    showPreview: true,
+    showDownload: true,
+    editable: true,
+  };
+
+  multipleFileConfig = {
+    accept: '*',
+    maxSize: 10 * 1024 * 1024,
+    multiple: true,
+    showPreview: true,
+    showDownload: true,
+    editable: true,
+  };
+
+  documentFileConfig = {
+    accept: '.pdf,.doc,.docx,.xls,.xlsx',
+    maxSize: 25 * 1024 * 1024,
+    multiple: false,
+    showPreview: true,
+    showDownload: true,
+    editable: true,
+  };
+
+  onSingleFileChange(file: any): void {
+    console.log('Single file selected:', file);
+    this.dialog.open(SuccessPopupComponent, {
+      data: {
+        title: 'File Selected',
+        message: `File: ${file?.name}\nSize: ${(file?.size / 1024).toFixed(2)} KB\nType: ${file?.type}`,
+        icon: 'attach_file'
+      }
+    });
+  }
+
+  onMultipleFileChange(files: any): void {
+    console.log('Multiple files selected:', files);
+  }
+
+  onDocumentFileChange(file: any): void {
+    console.log('Document file selected:', file);
+  }
+
+  onFilePreview(file: any): void {
+    const fileType = file.type || '';
+    const hasUrl = file.url || file.file;
+    
+    if (!hasUrl) {
+      this.dialog.open(FailurePopupComponent, {
+        data: {
+          title: 'Preview Not Available',
+          message: 'File preview is not available. You can still download the file.',
+          icon: 'info'
+        }
+      });
+      return;
+    }
+
+    let previewContent = '';
+    const isImage = fileType.startsWith('image/');
+    const isPdf = fileType.includes('pdf');
+    const isWord = fileType.includes('word') || fileType.includes('document');
+    const isExcel = fileType.includes('excel') || fileType.includes('sheet') || fileType.includes('spreadsheet');
+    const url = file.url || URL.createObjectURL(file.file);
+
+    if (isImage) {
+      previewContent = `<div style="text-align: center;"><img src="${url}" alt="${file.name}" style="max-width: 100%; max-height: 400px; object-fit: contain;"></div>`;
+    } else if (isPdf) {
+      previewContent = `<iframe src="${url}" style="width: 100%; height: 500px; border: none;"></iframe>`;
+    } else {
+      previewContent = `
+        <div style="text-align: center; padding: 40px;">
+          <mat-icon style="font-size: 64px; width: 64px; height: 64px; color: #666;">
+            ${isWord ? 'description' : isExcel ? 'table_chart' : 'insert_drive_file'}
+          </mat-icon>
+          <p style="margin: 16px 0;">${file.name}</p>
+          <p style="color: #666; font-size: 14px;">${this.formatFileSize(file.size)}</p>
+        </div>
+      `;
+    }
+
+    const dialogRef = this.dialog.open(DialogComponent, {
+      data: {
+        title: `File: ${file.name}`,
+        message: previewContent,
+        confirmText: 'Download',
+        cancelText: 'Close',
+        htmlContent: true,
+        width: isPdf ? '800px' : '500px'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = file.name;
+        link.click();
+      }
+    });
+  }
+
+  formatFileSize(bytes?: number): string {
+    if (!bytes) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
 
   // Form Configuration
   formConfig: FormConfig = {
@@ -450,10 +637,10 @@ export class DemoComponent {
   tableConfig: TableConfig = {
     columns: [
       { key: 'id', label: 'ID', width: '60px', sortable: true },
-      { key: 'name', label: 'Name', sortable: true, filterable: true },
-      { key: 'email', label: 'Email', filterable: true },
-      { key: 'department', label: 'Department', filterable: true },
-      { key: 'status', label: 'Status', filterable: true },
+      { key: 'name', label: 'Name', sortable: true, filterable: true, editable: true },
+      { key: 'email', label: 'Email', filterable: true, editable: true },
+      { key: 'department', label: 'Department', filterable: true, editable: true },
+      { key: 'status', label: 'Status', filterable: true, editable: true },
       { key: 'joinDate', label: 'Join Date', type: 'date' },
     ],
     sortable: true,
@@ -523,7 +710,7 @@ export class DemoComponent {
     },
   ];
 
-  // Advanced Table Configuration with nested data, conditional columns
+  // Advanced Table Configuration with nested data, conditional columns, attachments, selects
   advancedTableConfig: TableConfig = {
     columns: [
       { 
@@ -537,19 +724,27 @@ export class DemoComponent {
         label: 'Employee', 
         sortable: true, 
         filterable: true,
-        path: 'personal.name'
+        path: 'personal.name',
+        editable: true
       },
       { 
         key: 'email', 
         label: 'Email',
         path: 'personal.email',
-        filterable: true 
+        filterable: true,
+        editable: true
       },
       { 
         key: 'department', 
         label: 'Department',
         filterable: true,
-        styleClass: (value: any, row: any) => `department-${row.department?.toLowerCase()}`
+        editable: true,
+        editorType: 'select',
+        editorOptions: { options: this.departmentOptions },
+        transform: (value: any) => value || '-',
+        cellStyle: (value: any) => ({
+          color: value === 'Engineering' ? '#1976d2' : value === 'Marketing' ? '#e91e63' : value === 'HR' ? '#4caf50' : '#666'
+        })
       },
       { 
         key: 'salary', 
@@ -557,13 +752,16 @@ export class DemoComponent {
         type: 'number',
         align: 'right',
         transform: (value: any) => `$${Number(value).toLocaleString()}`,
-        visible: true
+        visible: true,
+        editable: true
       },
       { 
         key: 'status', 
         label: 'Status',
         filterable: true,
         transform: (value: any) => value?.charAt(0).toUpperCase() + value?.slice(1),
+        editorType: 'select',
+        editorOptions: { options: this.statusOptions },
         cellStyle: (value: any) => ({
           color: value === 'active' ? 'green' : value === 'inactive' ? 'red' : 'orange',
           fontWeight: 'bold'
@@ -576,10 +774,26 @@ export class DemoComponent {
         format: 'DD-MMM-YYYY'
       },
       { 
+        key: 'skills', 
+        label: 'Skills',
+        transform: (value: any) => value ? value.join(', ') : '-'
+      },
+      { 
+        key: 'country', 
+        label: 'Country',
+        transform: (value: any) => value || '-'
+      },
+      { 
         key: 'attachments', 
         label: 'Attachments',
-        type: 'custom',
-        render: (value: any) => value ? `${value.length} file(s)` : 'None'
+        type: 'attachment',
+        transform: (value: any) => value ? `${value.length} file(s)` : 'None',
+        render: (value: any, row: any) => {
+          if (!value || value.length === 0) return '<span class="no-attachments">None</span>';
+          return value.map((f: any) => 
+            `<span class="attachment-badge">${this.getFileIcon(f.type)}${f.name}</span>`
+          ).join('');
+        }
       },
       { 
         key: 'manager', 
@@ -605,6 +819,18 @@ export class DemoComponent {
         action: 'edit' 
       },
       { 
+        label: 'Preview', 
+        icon: 'visibility', 
+        action: 'preview',
+        visible: (row: any) => row.attachments && row.attachments.length > 0
+      },
+      { 
+        label: 'Download', 
+        icon: 'download', 
+        action: 'download',
+        visible: (row: any) => row.attachments && row.attachments.length > 0
+      },
+      { 
         label: 'Delete', 
         icon: 'delete', 
         color: 'warn', 
@@ -625,7 +851,12 @@ export class DemoComponent {
       salary: 95000,
       status: 'active',
       startDate: '2024-01-15',
-      attachments: [{ name: 'resume.pdf' }, { name: 'cert.pdf' }],
+      skills: ['Angular', 'TypeScript', 'Node.js'],
+      country: 'United States',
+      attachments: [
+        { name: 'resume.pdf', type: 'application/pdf', size: 245000, url: '/assets/resume.pdf' },
+        { name: 'cert.pdf', type: 'application/pdf', size: 120000, url: '/assets/cert.pdf' }
+      ],
       reporting: { manager: 'Sarah Wilson' }
     },
     {
@@ -635,7 +866,11 @@ export class DemoComponent {
       salary: 75000,
       status: 'inactive',
       startDate: '2024-02-20',
-      attachments: [{ name: 'portfolio.pdf' }],
+      skills: ['SEO', 'Content Marketing', 'Analytics'],
+      country: 'Canada',
+      attachments: [
+        { name: 'portfolio.pdf', type: 'application/pdf', size: 350000, url: '/assets/portfolio.pdf' }
+      ],
       reporting: { manager: 'Mike Brown' }
     },
     {
@@ -645,6 +880,8 @@ export class DemoComponent {
       salary: 110000,
       status: 'active',
       startDate: '2024-03-10',
+      skills: ['React', 'Python', 'AWS', 'Docker'],
+      country: 'United States',
       attachments: [],
       reporting: { manager: 'Sarah Wilson' }
     },
@@ -655,8 +892,27 @@ export class DemoComponent {
       salary: 65000,
       status: 'pending',
       startDate: '2024-03-15',
-      attachments: [{ name: 'cv.pdf' }, { name: 'references.pdf' }],
+      skills: ['Recruiting', 'Training', 'Employee Relations'],
+      country: 'United Kingdom',
+      attachments: [
+        { name: 'cv.pdf', type: 'application/pdf', size: 180000, url: '/assets/cv.pdf' },
+        { name: 'references.docx', type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', size: 95000, url: '/assets/references.docx' }
+      ],
       reporting: { manager: 'Tom Davis' }
+    },
+    {
+      id: 5,
+      personal: { name: 'Charlie Wilson', email: 'charlie@example.com' },
+      department: 'Finance',
+      salary: 85000,
+      status: 'active',
+      startDate: '2024-04-01',
+      skills: ['Excel', 'Financial Modeling', 'SAP'],
+      country: 'Germany',
+      attachments: [
+        { name: 'report.xlsx', type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', size: 520000, url: '/assets/report.xlsx' }
+      ],
+      reporting: { manager: 'Emma Davis' }
     },
   ];
 
@@ -756,7 +1012,64 @@ export class DemoComponent {
           ]
         }
       });
+    } else if (event.action.action === 'download') {
+      this.downloadAttachment(event.row);
+    } else if (event.action.action === 'preview') {
+      this.previewAttachment(event.row);
     }
+  }
+
+  downloadAttachment(row: any): void {
+    const attachments = row.attachments || [];
+    if (attachments.length === 0) return;
+    
+    attachments.forEach((file: any) => {
+      if (file.url) {
+        const link = document.createElement('a');
+        link.href = file.url;
+        link.download = file.name;
+        link.click();
+      }
+    });
+    
+    this.dialog.open(SuccessPopupComponent, {
+      data: {
+        title: 'Download Started',
+        message: `Downloading ${attachments.length} file(s)`,
+        icon: 'download'
+      }
+    });
+  }
+
+  previewAttachment(row: any): void {
+    const attachments = row.attachments || [];
+    if (attachments.length === 0) return;
+    
+    const file = attachments[0];
+    const fileType = file.type || '';
+    
+    let content = '';
+    if (fileType.includes('pdf')) {
+      content = `<iframe src="${file.url}" style="width: 100%; height: 500px; border: none;"></iframe>`;
+    } else if (fileType.includes('image')) {
+      content = `<img src="${file.url}" alt="${file.name}" style="max-width: 100%;">`;
+    } else if (fileType.includes('word') || fileType.includes('document')) {
+      content = `<p>Word document preview not available. <a href="${file.url}" download>Download</a></p>`;
+    } else if (fileType.includes('excel') || fileType.includes('sheet')) {
+      content = `<p>Excel preview not available. <a href="${file.url}" download>Download</a></p>`;
+    } else {
+      content = `<p>Preview not available for this file type. <a href="${file.url}" download>Download</a></p>`;
+    }
+
+    this.dialog.open(DialogComponent, {
+      data: {
+        title: `Preview: ${file.name}`,
+        message: content,
+        confirmText: 'Download',
+        cancelText: 'Close',
+        htmlContent: true
+      }
+    });
   }
 
   // Helper methods

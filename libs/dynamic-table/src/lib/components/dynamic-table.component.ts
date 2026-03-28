@@ -10,6 +10,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { SelectionModel } from '@angular/cdk/collections';
 import { 
   TableConfig, 
@@ -37,6 +40,9 @@ import { DynamicTableService } from '../services/dynamic-table.service';
     MatInputModule,
     MatFormFieldModule,
     MatTooltipModule,
+    MatSelectModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
   ],
   template: `
     <div class="table-container" [class]="config.className">
@@ -95,12 +101,57 @@ import { DynamicTableService } from '../services/dynamic-table.service';
               <td mat-cell *matCellDef="let row"
                   [style.text-align]="column.align || 'left'"
                   [ngClass]="getCellClass(row, column)"
-                  [ngStyle]="getCellStyle(row, column)">
-                @if (isCellEditable(row, column)) {
-                  <input matInput [value]="getCellValue(row, column)" 
-                         (blur)="onCellEdit(row, column, $event)" />
+                  [ngStyle]="getCellStyle(row, column)"
+                  (dblclick)="enableEditMode(row, column)">
+                @if (isEditMode(row, column)) {
+                  @switch (column.editorType) {
+                    @case ('select') {
+                      <mat-select [value]="getCellValue(row, column)" 
+                                  (selectionChange)="onCellEdit(row, column, $event.value)"
+                                  (blur)="disableEditMode()">
+                        @for (opt of column.editorOptions?.options || []; track opt.value) {
+                          <mat-option [value]="opt.value">{{ opt.label }}</mat-option>
+                        }
+                      </mat-select>
+                    }
+                    @case ('date') {
+                      <input matInput [matDatepicker]="editDatePicker" 
+                             [value]="getCellValue(row, column)"
+                             (dateChange)="onCellEdit(row, column, $event.value)">
+                      <mat-datepicker-toggle matSuffix [for]="editDatePicker"></mat-datepicker-toggle>
+                      <mat-datepicker #editDatePicker></mat-datepicker>
+                    }
+                    @case ('checkbox') {
+                      <mat-checkbox [checked]="getCellValue(row, column)" 
+                                    (change)="onCellEdit(row, column, $event.checked)">
+                      </mat-checkbox>
+                    }
+                    @case ('number') {
+                      <input matInput type="number" [value]="getCellValue(row, column)"
+                             (blur)="onCellEdit(row, column, $event)"
+                             (keydown.enter)="onCellEdit(row, column, $event)">
+                    }
+                    @default {
+                      <input matInput [value]="getCellValue(row, column)" 
+                             (blur)="onCellEdit(row, column, $event)"
+                             (keydown.enter)="onCellEdit(row, column, $event)">
+                    }
+                  }
                 } @else {
-                  {{ formatCellValue(row, column) }}
+                  @if (column.type === 'boolean') {
+                    <mat-icon [class]="getCellValue(row, column) ? 'boolean-true' : 'boolean-false'">
+                      {{ getCellValue(row, column) ? 'check_circle' : 'cancel' }}
+                    </mat-icon>
+                  } @else if (column.type === 'attachment') {
+                    <div class="attachment-cell" (click)="onAttachmentClick(row, column, $event)">
+                      <mat-icon>attach_file</mat-icon>
+                      <span>{{ formatCellValue(row, column) }}</span>
+                    </div>
+                  } @else if (column.type === 'custom' && column.render) {
+                    <span [innerHTML]="column.render(getCellValue(row, column), row)"></span>
+                  } @else {
+                    {{ formatCellValue(row, column) }}
+                  }
                 }
               </td>
             </ng-container>
@@ -166,6 +217,17 @@ import { DynamicTableService } from '../services/dynamic-table.service';
     .no-data { text-align: center; padding: 40px !important; color: #999; }
     mat-icon { font-size: 18px; width: 18px; height: 18px; }
     input { border: none; background: transparent; width: 100%; }
+    .boolean-true { color: #4caf50; }
+    .boolean-false { color: #f44336; }
+    .attachment-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+      color: #1976d2;
+    }
+    .attachment-cell:hover { text-decoration: underline; }
+    mat-select { width: 100%; }
   `],
 })
 export class DynamicTableComponent implements OnInit, OnChanges {
@@ -178,6 +240,7 @@ export class DynamicTableComponent implements OnInit, OnChanges {
   @Output() selectionChange = new EventEmitter<any[]>();
   @Output() rowAction = new EventEmitter<{ action: TableAction; row: any }>();
   @Output() cellEdit = new EventEmitter<{ row: any; column: TableColumn; value: any }>();
+  @Output() attachmentPreview = new EventEmitter<{ row: any; column: TableColumn; file: any }>();
 
   private tableService = inject(DynamicTableService);
   selection = new SelectionModel<any>(true, []);
@@ -188,6 +251,8 @@ export class DynamicTableComponent implements OnInit, OnChanges {
   pageState = signal<PageState>({ pageIndex: 0, pageSize: 10, length: 0 });
   filterValue = signal('');
   sortState = signal<SortState>({ active: '', direction: '' });
+  
+  editingCell = signal<{ row: any; column: TableColumn } | null>(null);
 
   ngOnInit(): void {
     this.processData();
@@ -353,9 +418,39 @@ export class DynamicTableComponent implements OnInit, OnChanges {
     return !!(this.config.inlineEditable && column.editable);
   }
 
-  onCellEdit(row: any, column: TableColumn, event: Event): void {
-    const input = event.target as HTMLInputElement;
-    this.cellEdit.emit({ row, column, value: input.value });
+  isEditMode(row: any, column: TableColumn): boolean {
+    const editing = this.editingCell();
+    return editing?.row === row && editing?.column === column;
+  }
+
+  enableEditMode(row: any, column: TableColumn): void {
+    if (this.isCellEditable(row, column)) {
+      this.editingCell.set({ row, column });
+    }
+  }
+
+  disableEditMode(): void {
+    this.editingCell.set(null);
+  }
+
+  onCellEdit(row: any, column: TableColumn, event: Event | any): void {
+    let value: any;
+    if (event instanceof Event) {
+      const input = event.target as HTMLInputElement;
+      value = input.value;
+    } else {
+      value = event;
+    }
+    this.cellEdit.emit({ row, column, value });
+    this.disableEditMode();
+  }
+
+  onAttachmentClick(row: any, column: TableColumn, event: Event): void {
+    event.stopPropagation();
+    const attachments = this.getCellValue(row, column);
+    if (attachments && attachments.length > 0) {
+      this.attachmentPreview.emit({ row, column, file: attachments[0] });
+    }
   }
 
   getSelectedRows(): any[] {

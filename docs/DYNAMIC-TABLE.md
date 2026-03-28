@@ -107,7 +107,7 @@ interface TableColumn {
   label: string;
   
   // Cell value type
-  type?: 'text' | 'number' | 'date' | 'boolean' | 'custom' | 'template';
+  type?: 'text' | 'number' | 'date' | 'boolean' | 'custom' | 'template' | 'attachment' | 'select' | 'checkbox';
   
   // Column width
   width?: string;
@@ -140,7 +140,7 @@ interface TableColumn {
   
   // Inline editing
   editable?: boolean;
-  editorType?: 'text' | 'select' | 'date' | 'number';
+  editorType?: 'text' | 'select' | 'date' | 'number' | 'checkbox';
   editorOptions?: any;
   
   // Value transformation
@@ -225,6 +225,61 @@ interface TableColumn {
   label: 'Name',
   editable: true,
   editorType: 'text'
+}
+```
+
+### Select Editor
+```typescript
+{
+  key: 'department',
+  label: 'Department',
+  editable: true,
+  editorType: 'select',
+  editorOptions: {
+    options: [
+      { label: 'Engineering', value: 'Engineering' },
+      { label: 'Marketing', value: 'Marketing' },
+      { label: 'HR', value: 'HR' }
+    ]
+  }
+}
+```
+
+### Date Editor
+```typescript
+{
+  key: 'startDate',
+  label: 'Start Date',
+  editable: true,
+  editorType: 'date',
+  type: 'date'
+}
+```
+
+### Checkbox Editor
+```typescript
+{
+  key: 'isActive',
+  label: 'Active',
+  editable: true,
+  editorType: 'checkbox',
+  type: 'boolean'
+}
+```
+
+### Attachment Column
+```typescript
+{
+  key: 'attachments',
+  label: 'Attachments',
+  type: 'attachment',
+  transform: (value) => value ? `${value.length} file(s)` : 'None',
+  render: (value, row) => {
+    if (!value || value.length === 0) return '<span>No files</span>';
+    return value.map((f: any) => 
+      `<span class="attachment-badge">📎${f.name}</span>`
+    ).join('');
+  }
 }
 ```
 
@@ -479,6 +534,52 @@ columns: [
   { key: 'country', path: 'address.country.name', label: 'Country' },
   { key: 'zip', path: 'address.details.zip', label: 'Zip Code' }
 ]
+```
+
+Example with deeply nested data:
+```typescript
+// Data structure
+const data = [
+  {
+    id: 1,
+    personal: { name: 'John Doe', email: 'john@example.com' },
+    department: 'Engineering',
+    reporting: { manager: 'Sarah Wilson' },
+    attachments: [
+      { name: 'resume.pdf', type: 'application/pdf', url: '/assets/resume.pdf' }
+    ]
+  }
+];
+
+// Column configuration
+columns: [
+  { key: 'name', label: 'Employee', path: 'personal.name' },
+  { key: 'email', label: 'Email', path: 'personal.email' },
+  { key: 'manager', label: 'Reports To', path: 'reporting.manager' },
+  { key: 'attachments', label: 'Files', type: 'attachment' }
+]
+```
+
+## Attachment Preview
+
+When using attachment columns, you can handle file preview:
+
+```html
+<lib-dynamic-table
+  [config]="config"
+  [data]="data"
+  (attachmentPreview)="onAttachmentPreview($event)">
+</lib-dynamic-table>
+```
+
+```typescript
+onAttachmentPreview(event: { row: any; column: TableColumn; file: any }) {
+  const file = event.file;
+  // Open preview dialog
+  this.dialog.open(PreviewDialogComponent, {
+    data: { file }
+  });
+}
 ```
 
 ## Best Practices

@@ -26,10 +26,10 @@ import { SelectOption } from '@org/shared';
       }
       <mat-select [disabled]="disabled" [value]="value" multiple (selectionChange)="onSelectionChange($event.value)">
         @if (showSelectAll) {
-          <mat-option (click)="toggleSelectAll()">
-            <mat-checkbox [checked]="allSelected()" (change)="toggleSelectAll()">
-              Select All
-            </mat-checkbox>
+          <mat-option [value]="'__select_all__'" (click)="toggleSelectAll($event)">
+            <span [style.font-weight]="allSelected() ? 'bold' : 'normal'">
+              {{ allSelected() ? 'Deselect All' : 'Select All' }}
+            </span>
           </mat-option>
         }
         @for (option of filteredOptions(); track option.value) {
@@ -88,7 +88,8 @@ export class MultiSelectComponent implements ControlValueAccessor {
     return this.value.length === this.options.length;
   }
 
-  toggleSelectAll(): void {
+  toggleSelectAll(event?: Event): void {
+    event?.stopPropagation();
     if (this.allSelected()) {
       this.value = [];
     } else {

@@ -12,15 +12,21 @@ import { DialogConfig } from '@org/shared';
   template: `
     <h2 mat-dialog-title>{{ data.title }}</h2>
     <mat-dialog-content>
-      <p>{{ data.message }}</p>
+      @if (data.htmlContent) {
+        <div [innerHTML]="data.message"></div>
+      } @else {
+        <p>{{ data.message }}</p>
+      }
     </mat-dialog-content>
     <mat-dialog-actions align="end">
-      @if (!data.disableClose) {
-        <button mat-button mat-dialog-close>Cancel</button>
+      @if (!data.disableClose && data.cancelText) {
+        <button mat-button mat-dialog-close>{{ data.cancelText }}</button>
       }
-      <button mat-raised-button [color]="confirmColor" [mat-dialog-close]="true" cdkFocusInitial>
-        {{ data.confirmText || 'Confirm' }}
-      </button>
+      @if (data.confirmText) {
+        <button mat-raised-button [color]="confirmColor" [mat-dialog-close]="true" cdkFocusInitial>
+          {{ data.confirmText }}
+        </button>
+      }
     </mat-dialog-actions>
   `,
   styles: [`

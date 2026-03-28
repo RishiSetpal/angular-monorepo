@@ -41,6 +41,7 @@ export interface DialogConfig {
   cancelText?: string;
   width?: string;
   disableClose?: boolean;
+  htmlContent?: boolean;
 }
 
 export interface ToastConfig {

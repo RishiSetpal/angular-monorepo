@@ -1,4 +1,4 @@
-export type ColumnType = 'text' | 'number' | 'date' | 'boolean' | 'custom' | 'template';
+export type ColumnType = 'text' | 'number' | 'date' | 'boolean' | 'custom' | 'template' | 'attachment';
 export type CellAlign = 'left' | 'center' | 'right';
 export type SortDirection = 'asc' | 'desc' | '';
 
@@ -24,7 +24,7 @@ export interface TableColumn {
   
   // Inline editing
   editable?: boolean;
-  editorType?: 'text' | 'select' | 'date' | 'number';
+  editorType?: 'text' | 'select' | 'date' | 'number' | 'checkbox';
   editorOptions?: any;
   
   // Value transformation
