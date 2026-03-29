@@ -1,8 +1,10 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { DynamicFormComponent, FormConfig } from '@org/dynamic-form';
 import { DynamicTableComponent, TableConfig } from '@org/dynamic-table';
@@ -27,9 +29,11 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    ReactiveFormsModule,
     MatTabsModule,
     MatCardModule,
     MatIconModule,
+    MatButtonModule,
     MatDialogModule,
     DynamicFormComponent,
     DynamicTableComponent,
@@ -56,6 +60,214 @@ import {
         <mat-tab label="UI Components">
           <div class="tab-content">
             <h2>Reusable UI Components</h2>
+            
+            <!-- Reactive Forms Example -->
+            <mat-card class="component-card" style="margin-bottom: 24px;">
+              <mat-card-header>
+                <mat-card-title>Reactive Forms Example</mat-card-title>
+                <mat-card-subtitle>Industry Standard - All components work with formControlName</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <form [formGroup]="reactiveForm" (ngSubmit)="onReactiveFormSubmit()">
+                  <div class="form-row">
+                    <lib-text-input 
+                      formControlName="firstName"
+                      label="First Name" 
+                      placeholder="Enter first name"
+                      icon="person">
+                    </lib-text-input>
+                    
+                    <lib-text-input 
+                      formControlName="lastName"
+                      label="Last Name" 
+                      placeholder="Enter last name"
+                      icon="person">
+                    </lib-text-input>
+                  </div>
+                  
+                  <div class="form-row">
+                    <lib-text-input 
+                      formControlName="email"
+                      label="Email" 
+                      type="email"
+                      placeholder="Enter email"
+                      icon="email">
+                    </lib-text-input>
+                    
+                    <lib-text-input 
+                      formControlName="phone"
+                      label="Phone" 
+                      type="tel"
+                      placeholder="10-digit phone">
+                    </lib-text-input>
+                  </div>
+                  
+                  <div class="form-row">
+                    <lib-single-select 
+                      formControlName="country"
+                      label="Country" 
+                      [options]="countryOptions"
+                      [searchable]="true">
+                    </lib-single-select>
+                    
+                    <lib-single-select 
+                      formControlName="department"
+                      label="Department" 
+                      [options]="departmentOptions">
+                    </lib-single-select>
+                  </div>
+                  
+                  <lib-multi-select 
+                    formControlName="skills"
+                    label="Skills" 
+                    [options]="skillOptions"
+                    [showSelectAll]="true"
+                    [maxSelections]="5">
+                  </lib-multi-select>
+                  
+                  <div class="form-row">
+                    <lib-date-picker 
+                      formControlName="birthDate"
+                      label="Birth Date">
+                    </lib-date-picker>
+                    
+                    <lib-radio-button 
+                      formControlName="gender"
+                      label="Gender"
+                      [options]="genderOptions">
+                    </lib-radio-button>
+                  </div>
+                  
+                  <lib-textarea 
+                    formControlName="bio"
+                    label="Bio" 
+                    placeholder="Tell us about yourself..."
+                    [rows]="3">
+                  </lib-textarea>
+                  
+                  <div class="checkbox-row">
+                    <lib-checkbox 
+                      formControlName="terms"
+                      label="I agree to terms and conditions">
+                    </lib-checkbox>
+                    
+                    <lib-toggle 
+                      formControlName="notifications"
+                      label="Enable notifications">
+                    </lib-toggle>
+                  </div>
+                  
+                  <button mat-raised-button color="primary" type="submit" [disabled]="reactiveForm.invalid">
+                    Submit Reactive Form
+                  </button>
+                </form>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Nested Reactive Forms Example -->
+            <mat-card class="component-card" style="margin-bottom: 24px;">
+              <mat-card-header>
+                <mat-card-title>Nested Reactive Forms</mat-card-title>
+                <mat-card-subtitle>Use formGroupName for nested objects</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <form [formGroup]="nestedReactiveForm" (ngSubmit)="onNestedFormSubmit()">
+                  <!-- Nested: Personal Info -->
+                  <fieldset class="form-fieldset">
+                    <legend>Personal Information</legend>
+                    <div formGroupName="personal">
+                      <div class="form-row">
+                        <lib-text-input 
+                          formControlName="firstName"
+                          label="First Name">
+                        </lib-text-input>
+                        <lib-text-input 
+                          formControlName="lastName"
+                          label="Last Name">
+                        </lib-text-input>
+                      </div>
+                      <div class="form-row">
+                        <lib-text-input 
+                          formControlName="email"
+                          label="Email"
+                          type="email">
+                        </lib-text-input>
+                        <lib-text-input 
+                          formControlName="phone"
+                          label="Phone">
+                        </lib-text-input>
+                      </div>
+                    </div>
+                  </fieldset>
+                  
+                  <!-- Nested: Address -->
+                  <fieldset class="form-fieldset">
+                    <legend>Address</legend>
+                    <div formGroupName="address">
+                      <lib-text-input 
+                        formControlName="street"
+                        label="Street Address">
+                      </lib-text-input>
+                      <div class="form-row">
+                        <lib-text-input 
+                          formControlName="city"
+                          label="City">
+                        </lib-text-input>
+                        <lib-text-input 
+                          formControlName="state"
+                          label="State">
+                        </lib-text-input>
+                      </div>
+                      <div class="form-row">
+                        <lib-text-input 
+                          formControlName="zipCode"
+                          label="Zip Code">
+                        </lib-text-input>
+                        <lib-single-select 
+                          formControlName="country"
+                          label="Country"
+                          [options]="countryOptions"
+                          [searchable]="true">
+                        </lib-single-select>
+                      </div>
+                    </div>
+                  </fieldset>
+                  
+                  <!-- Nested: Company -->
+                  <fieldset class="form-fieldset">
+                    <legend>Company</legend>
+                    <div formGroupName="company">
+                      <div class="form-row">
+                        <lib-text-input 
+                          formControlName="name"
+                          label="Company Name">
+                        </lib-text-input>
+                        <lib-text-input 
+                          formControlName="position"
+                          label="Position">
+                        </lib-text-input>
+                      </div>
+                      <lib-single-select 
+                        formControlName="department"
+                        label="Department"
+                        [options]="departmentOptions">
+                      </lib-single-select>
+                    </div>
+                  </fieldset>
+                  
+                  <lib-checkbox 
+                    formControlName="terms"
+                    label="I agree to terms and conditions">
+                  </lib-checkbox>
+                  
+                  <button mat-raised-button color="accent" type="submit" [disabled]="nestedReactiveForm.invalid">
+                    Submit Nested Form
+                  </button>
+                </form>
+              </mat-card-content>
+            </mat-card>
+
+            <h3>Individual Components</h3>
             <div class="components-grid">
               <!-- Text Input -->
               <mat-card class="component-card">
@@ -291,6 +503,36 @@ import {
       margin-bottom: 24px;
       color: #333;
     }
+    h3 {
+      margin: 24px 0 16px;
+      color: #666;
+    }
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .checkbox-row {
+      display: flex;
+      gap: 24px;
+      margin: 16px 0;
+      align-items: center;
+    }
+    form button[type="submit"] {
+      margin-top: 16px;
+    }
+    .form-fieldset {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .form-fieldset legend {
+      font-weight: 500;
+      color: #333;
+      padding: 0 8px;
+    }
     .table-actions {
       display: flex;
       gap: 12px;
@@ -363,6 +605,111 @@ export class DemoComponent {
     { label: 'Sales', value: 'Sales' },
     { label: 'Operations', value: 'Operations' },
   ];
+
+  // Reactive Form Example - Flat
+  reactiveForm!: FormGroup;
+
+  // Nested Reactive Form Example
+  nestedReactiveForm!: FormGroup;
+
+  constructor(private fb: FormBuilder) {
+    this.initReactiveForm();
+    this.initNestedReactiveForm();
+  }
+
+  private initReactiveForm(): void {
+    this.reactiveForm = this.fb.group({
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName: ['', [Validators.required]],
+      email: ['', [Validators.required, Validators.email]],
+      phone: ['', [Validators.pattern(/^\d{10}$/)]],
+      country: [''],
+      department: [''],
+      skills: [[]],
+      gender: ['male'],
+      birthDate: [null],
+      bio: ['', Validators.maxLength(500)],
+      terms: [false, Validators.requiredTrue],
+      notifications: [true]
+    });
+  }
+
+  private initNestedReactiveForm(): void {
+    this.nestedReactiveForm = this.fb.group({
+      // Nested: personal info
+      personal: this.fb.group({
+        firstName: ['', Validators.required],
+        lastName: ['', Validators.required],
+        email: ['', [Validators.required, Validators.email]],
+        phone: ['']
+      }),
+      // Nested: address
+      address: this.fb.group({
+        street: [''],
+        city: [''],
+        state: [''],
+        zipCode: [''],
+        country: ['']
+      }),
+      // Nested: company
+      company: this.fb.group({
+        name: [''],
+        department: [''],
+        position: ['']
+      }),
+      // Flat fields
+      terms: [false, Validators.requiredTrue]
+    });
+  }
+
+  onReactiveFormSubmit(): void {
+    if (this.reactiveForm.valid) {
+      console.log('Reactive Form Submitted:', this.reactiveForm.value);
+      this.dialog.open(SuccessPopupComponent, {
+        data: {
+          title: 'Reactive Form Submitted!',
+          message: `Name: ${this.reactiveForm.value.firstName} ${this.reactiveForm.value.lastName}\nEmail: ${this.reactiveForm.value.email}\n\nForm is valid and ready for API submission!`,
+          icon: 'check_circle',
+          autoClose: true,
+          autoCloseDuration: 5000
+        }
+      });
+    } else {
+      this.reactiveForm.markAllAsTouched();
+      this.dialog.open(FailurePopupComponent, {
+        data: {
+          title: 'Form Validation Error',
+          message: 'Please fill in all required fields correctly.',
+          icon: 'error'
+        }
+      });
+    }
+  }
+
+  onNestedFormSubmit(): void {
+    if (this.nestedReactiveForm.valid) {
+      console.log('Nested Form Submitted:', this.nestedReactiveForm.value);
+      const data = this.nestedReactiveForm.value;
+      this.dialog.open(SuccessPopupComponent, {
+        data: {
+          title: 'Nested Reactive Form Submitted!',
+          message: `Personal: ${data.personal.firstName} ${data.personal.email}\nAddress: ${data.address.city}, ${data.address.country}\nCompany: ${data.company.name} - ${data.company.position}\n\nNested form groups work perfectly!`,
+          icon: 'check_circle',
+          autoClose: true,
+          autoCloseDuration: 5000
+        }
+      });
+    } else {
+      this.nestedReactiveForm.markAllAsTouched();
+      this.dialog.open(FailurePopupComponent, {
+        data: {
+          title: 'Form Validation Error',
+          message: 'Please fill in all required fields in each section.',
+          icon: 'error'
+        }
+      });
+    }
+  }
 
   getFileIcon(type?: string): string {
     if (!type) return '📄 ';
@@ -981,10 +1328,18 @@ export class DemoComponent {
   onFormSubmit(data: any): void {
     console.log('Form submitted:', data);
     
+    // Here you would typically call an API service to save the data
+    // Example:
+    // this.apiService.post('/api/submit-form', data).subscribe({
+    //   next: (response) => this.handleSuccess(response),
+    //   error: (error) => this.handleError(error)
+    // });
+    
+    // For demo, show success popup
     const dialogRef = this.dialog.open(SuccessPopupComponent, {
       data: {
         title: 'Success!',
-        message: `Form submitted successfully!\n\nName: ${data.firstName} ${data.lastName}\nEmail: ${data.email}`,
+        message: `Form submitted successfully!\n\nName: ${data.firstName} ${data.lastName}\nEmail: ${data.email}\n\nData ready for API call.`,
         icon: 'check_circle',
         autoClose: true,
         autoCloseDuration: 5000,

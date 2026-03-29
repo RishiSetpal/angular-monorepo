@@ -738,27 +738,242 @@ export class ExampleComponent {
 
 ---
 
+## Form Integration: Reactive Forms vs Template-Driven
+
+### Which to Use? (Industry Standard)
+
+**Reactive Forms ✅ RECOMMENDED** - Industry standard for Angular enterprise applications
+
+| Scenario | Recommended |
+|----------|-------------|
+| Complex forms | Reactive Forms |
+| Dynamic fields | Reactive Forms |
+| Large applications | Reactive Forms |
+| Enterprise apps | Reactive Forms |
+| Simple forms (login, search) | Template-Driven OK |
+
+### Why Reactive Forms?
+
+1. **Centralized validation** - All validation in one place
+2. **Unit testable** - Easy to test form logic
+3. **Type safe** - Full TypeScript support
+4. **Scalable** - Works great with large forms
+5. **Industry standard** - Used in most Angular enterprise apps
+
+### Reactive Forms Example
+
+```typescript
+import { Component } from '@angular/core';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+
+@Component({
+  selector: 'app-user-form',
+  template: `
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <lib-text-input 
+        formControlName="name" 
+        label="Full Name"
+        icon="person">
+      </lib-text-input>
+
+      <lib-text-input 
+        formControlName="email" 
+        label="Email"
+        type="email">
+      </lib-text-input>
+
+      <lib-single-select 
+        formControlName="country" 
+        label="Country"
+        [options]="countries"
+        [searchable]="true">
+      </lib-single-select>
+
+      <lib-multi-select 
+        formControlName="skills" 
+        label="Skills"
+        [options]="skills"
+        [showSelectAll]="true">
+      </lib-multi-select>
+
+      <lib-date-picker 
+        formControlName="birthDate" 
+        label="Birth Date">
+      </lib-date-picker>
+
+      <lib-checkbox 
+        formControlName="terms" 
+        label="I agree to terms">
+      </lib-checkbox>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+        Submit
+      </button>
+    </form>
+  `
+})
+export class UserFormComponent {
+  countries = [
+    { label: 'United States', value: 'us' },
+    { label: 'Canada', value: 'ca' },
+    { label: 'United Kingdom', value: 'uk' }
+  ];
+
+  skills = [
+    { label: 'Angular', value: 'angular' },
+    { label: 'React', value: 'react' },
+    { label: 'TypeScript', value: 'ts' },
+    { label: 'Node.js', value: 'node' }
+  ];
+
+  form: FormGroup;
+
+  constructor(private fb: FormBuilder) {
+    this.form = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(2)]],
+      email: ['', [Validators.required, Validators.email]],
+      country: [''],
+      skills: [[]],
+      birthDate: [null],
+      terms: [false, Validators.requiredTrue]
+    });
+  }
+
+  onSubmit() {
+    if (this.form.valid) {
+      console.log('Form data:', this.form.value);
+      // { name: '', email: '', country: '', skills: [], birthDate: null, terms: false }
+    }
+  }
+}
+```
+
+### Template-Driven Example (Simple Forms Only)
+
+```typescript
+@Component({
+  template: `
+    <form #simpleForm="ngForm">
+      <lib-text-input 
+        [(ngModel)]="user.name" 
+        name="name"
+        label="Name">
+      </lib-text-input>
+
+      <lib-checkbox 
+        [(ngModel)]="user.agreed" 
+        name="agreed"
+        label="I agree">
+      </lib-checkbox>
+    </form>
+  `
+})
+export class SimpleFormComponent {
+  user = { name: '', agreed: false };
+}
+```
+
+---
+
 ## Best Practices
 
 1. **Use Standalone Components:** All components are standalone for tree-shaking - import only what you need
 
-2. **Material Appearance:** Use consistent appearance across all form fields
+2. **Use Reactive Forms:** Industry standard for enterprise Angular applications
+
+3. **Material Appearance:** Use consistent appearance across all form fields
    ```html
    <lib-text-input appearance="outline" ...></lib-text-input>
-   <lib-textarea appearance="outline" ...></lib-textarea>
    ```
 
-3. **Validation:** Always provide clear error messages with reactive forms
+4. **Validation:** Always provide clear error messages with reactive forms
    ```typescript
    email: ['', [Validators.required, Validators.email]]
    ```
 
-4. **Accessibility:** Components support ARIA attributes automatically
+5. **Accessibility:** Components support ARIA attributes automatically
 
-5. **Lazy Loading:** Import components only where needed for better performance
+6. **Lazy Loading:** Import components only where needed for better performance
 
-6. **Type Safety:** Use proper TypeScript types for options and configs
+7. **Type Safety:** Use proper TypeScript types for options and configs
 
-7. **Error Handling:** Use FailurePopupComponent for user-facing errors
+8. **Error Handling:** Use FailurePopupComponent for user-facing errors
 
-8. **User Feedback:** Use SuccessPopupComponent with autoClose for quick notifications
+9. **User Feedback:** Use SuccessPopupComponent with autoClose for quick notifications
+
+---
+
+## Integration Example
+
+### Saving Form Data to API
+
+```typescript
+import { Component } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { HttpClient } from '@angular/common/http';
+import { SuccessPopupComponent, FailurePopupComponent } from '@org/ui-components';
+
+@Component({...})
+export class ExampleComponent {
+  constructor(
+    private http: HttpClient,
+    private dialog: MatDialog
+  ) {}
+
+  onFormSubmit(data: any): void {
+    // Save to API
+    this.http.post('/api/forms/submit', data).subscribe({
+      next: () => {
+        this.dialog.open(SuccessPopupComponent, {
+          data: {
+            title: 'Success!',
+            message: 'Form saved successfully.',
+            autoClose: true,
+            autoCloseDuration: 3000
+          }
+        });
+      },
+      error: () => {
+        this.dialog.open(FailurePopupComponent, {
+          data: {
+            title: 'Error',
+            message: 'Failed to save form. Please try again.'
+          }
+        });
+      }
+    });
+  }
+}
+```
+
+### Saving Table Data to API
+
+```typescript
+import { Component } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+@Component({...})
+export class ExampleComponent {
+  constructor(private http: HttpClient) {}
+
+  onCellEdit(event: { row: any; column: any; value: any }): void {
+    event.row[event.column.key] = event.value;
+    
+    this.http.put(`/api/items/${event.row.id}`, event.row).subscribe({
+      next: () => console.log('Updated'),
+      error: (err) => console.error('Update failed', err)
+    });
+  }
+
+  onRowAction(event: { action: any; row: any }): void {
+    switch (event.action.action) {
+      case 'edit':
+        this.http.post(`/api/items/${event.row.id}/edit`, event.row).subscribe();
+        break;
+      case 'delete':
+        this.http.delete(`/api/items/${event.row.id}`).subscribe();
+        break;
+    }
+  }
+}
+```

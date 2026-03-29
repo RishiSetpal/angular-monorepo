@@ -164,9 +164,32 @@ npm install
 
 # Build all libraries
 nx build core shared ui-components dynamic-form dynamic-table
+```
 
-# Run demo app
-nx serve demo-app
+### Running Applications
+
+Run multiple applications simultaneously on different ports:
+
+```bash
+# Run demo-app on port 3200 (with live reload: -o or --open)
+nx serve demo-app --port=3200 -o
+
+# Run shop on port 4200 (with live reload)
+nx serve shop --port=4200 -o
+
+# Run API server
+nx serve api
+```
+
+Or use the development variants:
+
+```bash
+# Development server with custom port
+nx run demo-app:serve:development --port=3200 -o
+nx run shop:serve:development --port=4200 -o
+
+# Production build
+nx run demo-app:serve:production --port=3200
 ```
 
 ### Building Libraries
@@ -177,6 +200,14 @@ nx run-many --target=build
 # Build specific library
 nx build ui-components
 ```
+
+### Available Apps
+
+| App | Default Port | Command |
+|-----|--------------|---------|
+| demo-app | 4200 | `nx serve demo-app` |
+| shop | 4200 | `nx serve shop` |
+| api | 3000 | `nx serve api` |
 
 ## Component Usage Examples
 
