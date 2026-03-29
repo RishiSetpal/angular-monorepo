@@ -2,6 +2,44 @@
 
 A production-grade Angular monorepo application using Nx, featuring reusable UI components, dynamic form engine, and dynamic table engine built with Angular Material.
 
+## 📚 Documentation
+
+For detailed usage examples and API reference, see:
+
+- **[UI Components Guide](./docs/UI-COMPONENTS.md)** - Complete guide for all 13 UI components with examples
+- **[Dynamic Form Engine](./docs/DYNAMIC-FORM.md)** - JSON-driven form generation  
+- **[Dynamic Table Engine](./docs/DYNAMIC-TABLE.md)** - Configurable data tables with editing, sorting, filtering
+
+## Quick Examples
+
+### UI Components
+```html
+<lib-text-input label="Email" type="email"></lib-text-input>
+<lib-single-select [options]="countries" [searchable]="true"></lib-single-select>
+<lib-date-picker label="Birth Date"></lib-date-picker>
+<lib-file-upload [config]="{ multiple: true }"></lib-file-upload>
+```
+
+### Dynamic Form
+```typescript
+const formConfig = {
+  fields: [
+    { key: 'name', label: 'Name', type: 'text' },
+    { key: 'email', label: 'Email', type: 'email' }
+  ]
+};
+```
+
+### Dynamic Table
+```typescript
+const tableConfig = {
+  columns: [
+    { key: 'name', label: 'Name', sortable: true },
+    { key: 'status', label: 'Status', editable: true }
+  ]
+};
+```
+
 ## Architecture Overview
 
 ```
